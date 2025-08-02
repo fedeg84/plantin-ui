@@ -26,9 +26,16 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Set proper permissions
 RUN chmod -R 755 /usr/share/nginx/html
 
+# Create entrypoint script for Railway
+RUN echo '#!/bin/sh' > /entrypoint.sh && \
+    echo 'export PORT=${PORT:-80}' >> /entrypoint.sh && \
+    echo 'sed -i "s/listen 80;/listen $PORT;/" /etc/nginx/conf.d/default.conf' >> /entrypoint.sh && \
+    echo 'nginx -g "daemon off;"' >> /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
 # Test nginx config
 RUN nginx -t
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/entrypoint.sh"]

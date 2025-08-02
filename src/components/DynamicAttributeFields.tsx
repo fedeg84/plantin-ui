@@ -1,14 +1,14 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { productTypeApi } from '../api/endpoints';
-import { ProductTypeAttribute } from '../types/api';
+
 
 interface DynamicAttributeFieldsProps {
   productTypeId: number;
   register: UseFormRegister<any>;
   setValue: UseFormSetValue<any>;
-  watch: UseFormWatch<any>;
+
   errors?: Record<string, any>;
   existingValues?: Record<number, string>;
 }
@@ -17,7 +17,7 @@ export const DynamicAttributeFields: React.FC<DynamicAttributeFieldsProps> = ({
   productTypeId,
   register,
   setValue,
-  watch,
+
   errors,
   existingValues = {}
 }) => {

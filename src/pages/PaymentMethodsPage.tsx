@@ -21,8 +21,8 @@ export default function PaymentMethodsPage() {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingPaymentMethod, setEditingPaymentMethod] = useState<number | null>(null);
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortBy] = useState('name');
+  const [sortOrder] = useState<'asc' | 'desc'>('asc');
   const [filters, setFilters] = useState<Record<string, any>>({});
   const queryClient = useQueryClient();
 

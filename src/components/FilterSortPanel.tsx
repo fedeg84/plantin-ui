@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Filter, X } from 'lucide-react';
+import { Filter, X } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { SearchableMultiSelect } from './SearchableMultiSelect';
 import { DateRangePicker } from './DateRangePicker';

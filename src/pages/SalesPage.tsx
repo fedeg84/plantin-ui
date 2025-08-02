@@ -9,7 +9,7 @@ import { Plus, ShoppingCart, Trash2, Calculator } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ProductSelector from '../components/ProductSelector';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
-import { FilterSortPanel, FilterField } from '../components/FilterSortPanel';
+import { FilterSortPanel } from '../components/FilterSortPanel';
 import { SortableTableHeader } from '../components/SortableTableHeader';
 import { Product, PaymentMethod } from '../types/api';
 
@@ -29,7 +29,7 @@ type CreateSaleForm = z.infer<typeof createSaleSchema>;
 export default function SalesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(0);
+  const [page] = useState(0);
   const [sortBy, setSortBy] = useState('time');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filters, setFilters] = useState<Record<string, any>>({});

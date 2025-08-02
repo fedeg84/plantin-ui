@@ -7,7 +7,7 @@ import { productApi, productTypeApi } from '../api/endpoints';
 import { Plus, Package, Edit, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ProductTypeSelector from '../components/ProductTypeSelector';
-import { FilterSortPanel, FilterField } from '../components/FilterSortPanel';
+import { FilterSortPanel } from '../components/FilterSortPanel';
 import { SortableTableHeader } from '../components/SortableTableHeader';
 
 const createProductSchema = z.object({
@@ -29,11 +29,11 @@ export default function ProductsPage() {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(0);
+  const [page] = useState(0);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const [selectedProductType, setSelectedProductType] = useState<any>(null);
+  const [, setSelectedProductType] = useState<any>(null);
   const [selectedEditProductType, setSelectedEditProductType] = useState<any>(null);
   const queryClient = useQueryClient();
 
@@ -72,7 +72,7 @@ export default function ProductsPage() {
     handleSubmit: handleSubmitEdit,
     reset: resetEdit,
     setValue: setValueEdit,
-    watch: watchEdit,
+
     formState: { errors: errorsEdit },
   } = useForm<CreateProductForm>({
     resolver: zodResolver(createProductSchema),

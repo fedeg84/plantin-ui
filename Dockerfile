@@ -16,25 +16,23 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
-# Install curl for health check
-RUN apk add --no-cache curl
+# Remove default nginx config
+RUN rm -f /etc/nginx/conf.d/default.conf
 
 # Copy built app to nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Set proper permissions
-RUN chmod -R 755 /usr/share/nginx/html
+# Set proper permissions and create directories
+RUN chmod -R 755 /usr/share/nginx/html && \
+    mkdir -p /var/log/nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx /var/cache/nginx /usr/share/nginx/html
 
 # Test nginx config
 RUN nginx -t
 
 EXPOSE 80
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]

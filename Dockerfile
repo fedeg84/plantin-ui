@@ -16,6 +16,9 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
+# Install curl for debugging
+RUN apk add --no-cache curl
+
 # Remove default nginx config
 RUN rm -f /etc/nginx/conf.d/default.conf
 
@@ -33,6 +36,18 @@ RUN chmod -R 755 /usr/share/nginx/html && \
 # Test nginx config
 RUN nginx -t
 
+# Create startup script
+RUN echo '#!/bin/sh' > /start.sh && \
+    echo 'echo "Starting nginx on port 80..."' >> /start.sh && \
+    echo 'nginx -g "daemon off;" &' >> /start.sh && \
+    echo 'NGINX_PID=$!' >> /start.sh && \
+    echo 'echo "Nginx started with PID: $NGINX_PID"' >> /start.sh && \
+    echo 'sleep 2' >> /start.sh && \
+    echo 'echo "Testing health check..."' >> /start.sh && \
+    echo 'curl -f http://localhost/health || echo "Health check failed"' >> /start.sh && \
+    echo 'wait $NGINX_PID' >> /start.sh && \
+    chmod +x /start.sh
+
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/start.sh"]

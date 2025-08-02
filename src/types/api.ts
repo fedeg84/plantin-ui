@@ -1,0 +1,208 @@
+// Auth types
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+}
+
+// Product types
+export interface CreateProductRequest {
+  name: string;
+  description?: string;
+  code?: string;
+  type_id: number;
+  price?: number;
+  stock?: number;
+  picture_id?: number;
+  attributes?: Record<number, string>; // attribute_id -> value
+}
+
+export interface CreateProductResponse {
+  id: number;
+}
+
+export interface ProductAttributeValue {
+  id?: number;
+  product_id: number;
+  product_type_attribute_id: number;
+  value?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProductTypeAttribute {
+  id: number;
+  name: string;
+  product_type_id: number;
+  data_type: 'text' | 'number' | 'boolean' | 'date';
+  is_required: boolean;
+  display_order: number;
+  created_by: number;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface Product {
+  id: number;
+  name: string;
+  description?: string;
+  code?: string;
+  type_id: number;
+  type_name: string;
+  is_active: boolean;
+  created_at: string;
+  created_by_id: number;
+  created_by_username: string;
+  picture_id?: number;
+  current_price: number;
+  current_stock: number;
+  attribute_values?: ProductAttributeValue[];
+}
+
+export interface UpdateProductRequest {
+  name: string;
+  description?: string;
+  code?: string;
+  type_id: number;
+  current_price?: number;
+  current_stock?: number;
+  is_active?: boolean;
+  attributes?: Record<number, string>; // attribute_id -> value
+}
+
+export interface FindProductsRequest {
+  search?: string;
+  page?: number;
+  size?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  type_ids?: number[];
+  is_active?: boolean;
+}
+
+// Payment Method types
+export interface CreatePaymentMethodRequest {
+  name: string;
+  discount?: number;
+  is_active?: boolean;
+}
+
+export interface CreatePaymentMethodResponse {
+  id: number;
+}
+
+export interface PaymentMethod {
+  id: number;
+  name: string;
+  discount?: number;
+  is_active: boolean;
+  created_at: string;
+  created_by_id: number;
+  created_by_username: string;
+}
+
+export interface UpdatePaymentMethodRequest {
+  name: string;
+  discount?: number;
+  is_active?: boolean;
+}
+
+export interface FindPaymentMethodsRequest {
+  search?: string;
+  page?: number;
+  size?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  is_active?: boolean;
+}
+
+// Product Type interfaces
+export interface ProductType {
+  id: number;
+  name: string;
+  description?: string;
+  parent_id?: number;
+  parent_name?: string;
+  created_at: string;
+  created_by_id: number;
+  created_by_username: string;
+}
+
+export interface FindProductTypesRequest {
+  search?: string;
+  page?: number;
+  size?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+}
+
+// Sale types
+export interface CreateSaleItemRequest {
+  product_id: number;
+  quantity: number;
+  price?: number;
+}
+
+export interface CreateSaleRequest {
+  description?: string;
+  sale_items: CreateSaleItemRequest[];
+  price?: number;
+  discount?: number;
+  user_id?: number;
+  date?: string;
+  payment_method_id?: number;
+}
+
+export interface CreateSaleResponse {
+  id: number;
+}
+
+export interface Sale {
+  id: number;
+  time: string;
+  created_by_id: number;
+  created_by_username: string;
+  payment_method_id: number;
+  payment_method_name: string;
+  total_price: number;
+  discount: number;
+  items: SaleItem[];
+}
+
+export interface SaleItem {
+  id: number;
+  product: Product;
+  quantity: number;
+  price: number;
+}
+
+export interface FindSalesRequest {
+  search?: string;
+  page?: number;
+  size?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  created_by_ids?: number[];
+  payment_method_ids?: number[];
+  product_ids?: number[];
+  min_time?: string;
+  max_time?: string;
+  min_total_price?: number;
+  max_total_price?: number;
+}
+
+// Pagination types
+export interface PaginationInfo {
+  page: number;
+  size: number;
+  total_pages: number;
+  total_items: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  pagination: PaginationInfo;
+} 

@@ -38,13 +38,17 @@ RUN nginx -t
 
 # Create startup script
 RUN echo '#!/bin/sh' > /start.sh && \
-    echo 'echo "Starting nginx on port 80..."' >> /start.sh && \
+    echo 'echo "=== Railway Nginx Startup ==="' >> /start.sh && \
+    echo 'echo "Port: 80"' >> /start.sh && \
+    echo 'echo "Health check: GET /"' >> /start.sh && \
+    echo 'echo "Starting nginx..."' >> /start.sh && \
     echo 'nginx -g "daemon off;" &' >> /start.sh && \
     echo 'NGINX_PID=$!' >> /start.sh && \
-    echo 'echo "Nginx started with PID: $NGINX_PID"' >> /start.sh && \
-    echo 'sleep 2' >> /start.sh && \
-    echo 'echo "Testing health check..."' >> /start.sh && \
-    echo 'curl -f http://localhost/health || echo "Health check failed"' >> /start.sh && \
+    echo 'echo "Nginx PID: $NGINX_PID"' >> /start.sh && \
+    echo 'sleep 5' >> /start.sh && \
+    echo 'echo "Testing internal health check..."' >> /start.sh && \
+    echo 'curl -v http://localhost/ || echo "Internal health check failed"' >> /start.sh && \
+    echo 'echo "=== Ready for Railway health checks ==="' >> /start.sh && \
     echo 'wait $NGINX_PID' >> /start.sh && \
     chmod +x /start.sh
 

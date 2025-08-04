@@ -28,9 +28,12 @@ RUN chmod -R 755 /usr/share/nginx/html
 
 # Create entrypoint script for Railway
 RUN echo '#!/bin/sh' > /entrypoint.sh && \
+    echo 'set -e' >> /entrypoint.sh && \
     echo 'export PORT=${PORT:-80}' >> /entrypoint.sh && \
-    echo 'sed -i "s/listen 80;/listen $PORT;/" /etc/nginx/conf.d/default.conf' >> /entrypoint.sh && \
-    echo 'nginx -g "daemon off;"' >> /entrypoint.sh && \
+    echo 'echo "Starting nginx on port $PORT"' >> /entrypoint.sh && \
+    echo 'sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/conf.d/default.conf' >> /entrypoint.sh && \
+    echo 'echo "Nginx config updated, starting server..."' >> /entrypoint.sh && \
+    echo 'exec nginx -g "daemon off;"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
 # Test nginx config

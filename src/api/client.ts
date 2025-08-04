@@ -4,6 +4,10 @@ import toast from 'react-hot-toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
+// Debug: Log the API URL being used
+console.log('🔧 Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+console.log('🔧 Final API_BASE_URL:', API_BASE_URL);
+
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {

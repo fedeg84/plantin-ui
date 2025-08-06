@@ -13,16 +13,14 @@ import {
   ProductType, 
   CreateProductTypeRequest, 
   UpdateProductTypeRequest,
-  CreateProductTypeAttributeRequest 
+  CreateProductTypeAttributeRequest,
+  UpdateProductTypeAttributeRequest
 } from '../types/api';
 import toast from 'react-hot-toast';
 
 interface AttributeFormData {
   id?: number;
   name: string;
-  data_type: 'text' | 'number' | 'boolean' | 'date';
-  is_required: boolean;
-  display_order: number;
 }
 
 export default function ProductTypeFormPage() {
@@ -77,10 +75,7 @@ export default function ProductTypeFormPage() {
       if (data.attributes) {
         setAttributes(data.attributes.map(attr => ({
           id: attr.id,
-          name: attr.name,
-          data_type: attr.data_type,
-          is_required: attr.is_required,
-          display_order: attr.display_order
+          name: attr.name
         })));
       }
     } catch (error) {
@@ -114,19 +109,21 @@ export default function ProductTypeFormPage() {
     try {
       setSaving(true);
 
-      const attributesData: CreateProductTypeAttributeRequest[] = validAttributes.map((attr, index) => ({
-        name: attr.name.trim(),
-        data_type: attr.data_type,
-        is_required: attr.is_required,
-        display_order: index + 1
+      const attributesData: CreateProductTypeAttributeRequest[] = validAttributes.map((attr) => ({
+        name: attr.name.trim()
       }));
 
       if (isEditing && productType) {
+        const updateAttributesData: UpdateProductTypeAttributeRequest[] = validAttributes.map((attr) => ({
+          id: attr.id,
+          name: attr.name.trim()
+        }));
+        
         const updateData: UpdateProductTypeRequest = {
           name: formData.name.trim(),
           description: formData.description.trim() || undefined,
           parent_id: formData.parent_id,
-          attributes: attributesData
+          attributes: updateAttributesData
         };
         await productTypesApi.update(productType.id, updateData);
         toast.success('Tipo de producto actualizado correctamente');
@@ -154,10 +151,7 @@ export default function ProductTypeFormPage() {
 
   const addAttribute = () => {
     const newAttribute: AttributeFormData = {
-      name: '',
-      data_type: 'text',
-      is_required: false,
-      display_order: attributes.length + 1
+      name: ''
     };
     setAttributes([...attributes, newAttribute]);
   };
@@ -310,8 +304,8 @@ export default function ProductTypeFormPage() {
                       <GripVertical className="h-5 w-5" />
                     </button>
                     
-                    <div className="flex-1 grid grid-cols-1 gap-4 sm:grid-cols-4">
-                      <div>
+                    <div className="flex-1 flex items-center space-x-4">
+                      <div className="flex-1">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Nombre *
                         </label>
@@ -325,47 +319,14 @@ export default function ProductTypeFormPage() {
                         />
                       </div>
                       
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Tipo de Dato
-                        </label>
-                        <select
-                          value={attribute.data_type}
-                          onChange={(e) => updateAttribute(index, 'data_type', e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        >
-                          <option value="text">Texto</option>
-                          <option value="number">Número</option>
-                          <option value="boolean">Booleano</option>
-                          <option value="date">Fecha</option>
-                        </select>
-                      </div>
-                      
-                      <div className="flex items-end">
-                        <label className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={attribute.is_required}
-                            onChange={(e) => updateAttribute(index, 'is_required', e.target.checked)}
-                            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                          />
-                          <span className="ml-2 text-sm text-gray-700">Requerido</span>
-                        </label>
-                      </div>
-                      
-                      <div className="flex items-end justify-between">
-                        <span className="text-sm text-gray-500">
-                          Orden: {attribute.display_order}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeAttribute(index)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Eliminar atributo"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeAttribute(index)}
+                        className="text-red-600 hover:text-red-900"
+                        title="Eliminar atributo"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
                 </div>

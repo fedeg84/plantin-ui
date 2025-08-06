@@ -37,9 +37,6 @@ export interface ProductTypeAttribute {
   id: number;
   name: string;
   product_type_id: number;
-  data_type: 'text' | 'number' | 'boolean' | 'date';
-  is_required: boolean;
-  display_order: number;
   created_by: number;
   created_at: string;
   updated_at?: string;
@@ -143,14 +140,16 @@ export interface UpdateProductTypeRequest {
   name: string;
   description?: string;
   parent_id?: number;
-  attributes?: CreateProductTypeAttributeRequest[];
+  attributes?: UpdateProductTypeAttributeRequest[];
+}
+
+export interface UpdateProductTypeAttributeRequest {
+  id?: number;
+  name: string;
 }
 
 export interface CreateProductTypeAttributeRequest {
   name: string;
-  data_type: 'text' | 'number' | 'boolean' | 'date';
-  is_required: boolean;
-  display_order: number;
 }
 
 export interface CreateProductTypeResponse {

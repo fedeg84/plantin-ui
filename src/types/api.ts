@@ -129,6 +129,32 @@ export interface ProductType {
   created_at: string;
   created_by_id: number;
   created_by_username: string;
+  attributes?: ProductTypeAttribute[];
+}
+
+export interface CreateProductTypeRequest {
+  name: string;
+  description?: string;
+  parent_id?: number;
+  attributes?: CreateProductTypeAttributeRequest[];
+}
+
+export interface UpdateProductTypeRequest {
+  name: string;
+  description?: string;
+  parent_id?: number;
+  attributes?: CreateProductTypeAttributeRequest[];
+}
+
+export interface CreateProductTypeAttributeRequest {
+  name: string;
+  data_type: 'text' | 'number' | 'boolean' | 'date';
+  is_required: boolean;
+  display_order: number;
+}
+
+export interface CreateProductTypeResponse {
+  id: number;
 }
 
 export interface FindProductTypesRequest {

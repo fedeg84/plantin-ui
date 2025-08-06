@@ -175,20 +175,7 @@ export default function ProductTypeFormPage() {
     setAttributes(updatedAttributes);
   };
 
-  const moveAttribute = (fromIndex: number, toIndex: number) => {
-    if (toIndex < 0 || toIndex >= attributes.length) return;
-    
-    const updatedAttributes = [...attributes];
-    const [movedAttribute] = updatedAttributes.splice(fromIndex, 1);
-    updatedAttributes.splice(toIndex, 0, movedAttribute);
-    
-    // Update display_order
-    updatedAttributes.forEach((attr, index) => {
-      attr.display_order = index + 1;
-    });
-    
-    setAttributes(updatedAttributes);
-  };
+
 
   if (loading) {
     return (

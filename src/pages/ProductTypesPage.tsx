@@ -18,7 +18,7 @@ export default function ProductTypesPage() {
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [sortBy, setSortBy] = useState('name');
@@ -54,7 +54,7 @@ export default function ProductTypesPage() {
   useEffect(() => {
     // Debounce search
     const timeoutId = setTimeout(() => {
-      setCurrentPage(1);
+      setCurrentPage(0);
       loadProductTypes();
     }, 500);
 
@@ -249,62 +249,62 @@ export default function ProductTypesPage() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {totalPages > 0 && (
               <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                 <div className="flex-1 flex justify-between sm:hidden">
                   <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                    disabled={currentPage === 0}
                     className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Anterior
                   </button>
                   <button
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                    disabled={currentPage === totalPages - 1}
                     className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Siguiente
                   </button>
                 </div>
                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                     <div>
+                     <p className="text-sm text-gray-700">
+                       Mostrando <span className="font-medium">{currentPage * 10 + 1}</span> a{' '}
+                       <span className="font-medium">
+                         {Math.min((currentPage + 1) * 10, totalItems)}
+                       </span>{' '}
+                       de <span className="font-medium">{totalItems}</span> resultados
+                     </p>
+                   </div>
                   <div>
-                    <p className="text-sm text-gray-700">
-                      Mostrando <span className="font-medium">{((currentPage - 1) * 10) + 1}</span> a{' '}
-                      <span className="font-medium">
-                        {Math.min(currentPage * 10, totalItems)}
-                      </span>{' '}
-                      de <span className="font-medium">{totalItems}</span> resultados
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                      <button
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                        disabled={currentPage === 1}
+                                         <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                       <button
+                         onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                         disabled={currentPage === 0}
                         className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </button>
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                         const page = Math.max(0, Math.min(totalPages - 5, currentPage - 2)) + i;
                         return (
-                          <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                              currentPage === page
-                                ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
-                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                            }`}
-                          >
-                            {page}
-                          </button>
+                                                   <button
+                           key={page}
+                           onClick={() => setCurrentPage(page)}
+                           className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                             currentPage === page
+                               ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
+                               : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                           }`}
+                         >
+                           {page + 1}
+                         </button>
                         );
                       })}
-                      <button
-                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                        disabled={currentPage === totalPages}
+                                             <button
+                         onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                         disabled={currentPage === totalPages - 1}
                         className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ChevronRight className="h-5 w-5" />

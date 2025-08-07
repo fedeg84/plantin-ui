@@ -173,6 +173,28 @@ export default function EditProductPage() {
     return rootTypes;
   };
 
+  // Get full hierarchy name for a product type
+  const getHierarchyName = (typeId: number, types: ProductType[]): string => {
+    const type = types.find(t => t.id === typeId);
+    if (!type) return '';
+    
+    const hierarchy: string[] = [type.name];
+    let currentType = type;
+    
+    // Traverse up the hierarchy
+    while (currentType.parent_id) {
+      const parent = types.find(t => t.id === currentType.parent_id);
+      if (parent) {
+        hierarchy.unshift(parent.name);
+        currentType = parent;
+      } else {
+        break;
+      }
+    }
+    
+    return hierarchy.join(' ');
+  };
+
   const hierarchicalTypes = productTypes ? buildHierarchy(productTypes.items) : [];
 
   const toggleExpanded = (typeId: number) => {
@@ -204,16 +226,20 @@ export default function EditProductPage() {
     const actualProductType = productTypes?.items.find(pt => pt.id === type.id);
     
     if (actualProductType) {
-              setSelectedProductType(actualProductType);
-        
-        // Load attributes separately (including parent attributes for product editing)
-        try {
-          const attributes = await productTypeApi.getAttributes(type.id, true); // Include parent attributes
-          setSelectedProductTypeAttributes(attributes.items);
-        } catch (error) {
-          console.error('Error fetching attributes:', error);
-          setSelectedProductTypeAttributes([]);
-        }
+      setSelectedProductType(actualProductType);
+      
+      // Auto-generate name from hierarchy
+      const hierarchyName = getHierarchyName(type.id, productTypes?.items || []);
+      setValue('name', hierarchyName);
+      
+      // Load attributes separately (including parent attributes for product editing)
+      try {
+        const attributes = await productTypeApi.getAttributes(type.id, true); // Include parent attributes
+        setSelectedProductTypeAttributes(attributes.items);
+      } catch (error) {
+        console.error('Error fetching attributes:', error);
+        setSelectedProductTypeAttributes([]);
+      }
     } else {
       // Fallback if product type not found
       setSelectedProductType({
@@ -373,187 +399,177 @@ export default function EditProductPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Form */}
-        <div className="space-y-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Información del Producto</h2>
-            
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="label">Nombre *</label>
-                <input
-                  {...register('name')}
-                  type="text"
-                  className="input"
-                  placeholder="Nombre del producto"
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="label">Descripción</label>
-                <textarea
-                  {...register('description')}
-                  rows={3}
-                  className="input"
-                  placeholder="Descripción del producto"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Código</label>
-                  <input
-                    {...register('code')}
-                    type="text"
-                    className="input"
-                    placeholder="SKU-001"
-                  />
-                </div>
-
-                <div>
-                  <label className="label">Precio</label>
-                  <input
-                    {...register('current_price', { valueAsNumber: true })}
-                    type="number"
-                    step="0.01"
-                    className="input"
-                    placeholder="0.00"
-                  />
-                  {errors.current_price && (
-                    <p className="mt-1 text-sm text-red-600">{errors.current_price.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Stock</label>
-                  <input
-                    {...register('current_stock', { valueAsNumber: true })}
-                    type="number"
-                    className="input"
-                    placeholder="0"
-                  />
-                  {errors.current_stock && (
-                    <p className="mt-1 text-sm text-red-600">{errors.current_stock.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="label">Estado</label>
-                  <Controller
-                    name="is_active"
-                    control={control}
-                    render={({ field }) => (
-                      <select
-                        {...field}
-                        value={field.value ? 1 : 0}
-                        onChange={(e) => field.onChange(e.target.value === '1')}
-                        className="input"
-                      >
-                        <option value={1}>Activo</option>
-                        <option value={0}>Inactivo</option>
-                      </select>
-                    )}
-                  />
-                </div>
-              </div>
-
-                             {/* Product Attributes */}
-                               {(() => {
-                  console.log('Rendering attributes section');
-                  console.log('selectedProductType:', selectedProductType);
-                  console.log('selectedProductTypeAttributes:', selectedProductTypeAttributes);
-                  console.log('attributeValues:', attributeValues);
-                  return selectedProductType && selectedProductTypeAttributes && selectedProductTypeAttributes.length > 0;
-                })() && (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-gray-900">Atributos del Producto</h3>
-                    <div className="space-y-3">
-                      {selectedProductTypeAttributes.map((attribute) => (
-                       <div key={attribute.id}>
-                         <label className="label">{attribute.name}</label>
-                         <input
-                           type="text"
-                           className="input"
-                           placeholder={`Ingrese el valor para ${attribute.name}`}
-                           value={attributeValues[attribute.id] || ''}
-                           onChange={(e) => handleAttributeChange(attribute.id, e.target.value)}
-                         />
-                       </div>
-                     ))}
-                   </div>
-                 </div>
-               )}
-
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !selectedProductType}
-                  className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-                </button>
-              </div>
-            </form>
-          </div>
+      {/* Product Type Selector - First Step */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-medium text-gray-900">Paso 1: Seleccionar Tipo de Producto *</h2>
+          <button
+            type="button"
+            onClick={() => navigate('/product-types/create')}
+            className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Nuevo Tipo
+          </button>
         </div>
-
-        {/* Product Type Selector */}
-        <div className="space-y-6">
-          <div className="bg-white shadow rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">Tipo de Producto *</h2>
-              <button
-                type="button"
-                onClick={() => navigate('/product-types/create')}
-                className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Nuevo Tipo
-              </button>
+        
+        {selectedProductType && (
+          <div className="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-md">
+            <div className="text-sm text-primary-900">
+              <span className="font-medium">Tipo seleccionado:</span> {selectedProductType.name}
             </div>
-            
-            {selectedProductType && (
-              <div className="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-md">
-                <div className="font-medium text-sm text-primary-900">
-                  Tipo seleccionado: {selectedProductType.name}
-                </div>
-                {selectedProductType.description && (
-                  <div className="text-xs text-primary-700 mt-1">
-                    {selectedProductType.description}
-                  </div>
-                )}
+            {selectedProductType.description && (
+              <div className="text-xs text-primary-700 mt-1">
+                {selectedProductType.description}
               </div>
             )}
-
-            {errors.type_id && (
-              <p className="mb-4 text-sm text-red-600">{errors.type_id.message}</p>
-            )}
-
-            <div className="border border-gray-200 rounded-md max-h-96 overflow-y-auto">
-              {isLoadingTypes ? (
-                <div className="p-4 text-center text-gray-500">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto mb-2"></div>
-                  Cargando tipos de producto...
-                </div>
-              ) : hierarchicalTypes.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
-                  No hay tipos de producto disponibles
-                </div>
-              ) : (
-                <div>
-                  {hierarchicalTypes.map(type => renderTypeItem(type))}
-                </div>
-              )}
-            </div>
           </div>
+        )}
+
+        {errors.type_id && (
+          <p className="mb-4 text-sm text-red-600">{errors.type_id.message}</p>
+        )}
+
+        <div className="border border-gray-200 rounded-md max-h-96 overflow-y-auto">
+          {isLoadingTypes ? (
+            <div className="p-4 text-center text-gray-500">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto mb-2"></div>
+              Cargando tipos de producto...
+            </div>
+          ) : hierarchicalTypes.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
+              No hay tipos de producto disponibles
+            </div>
+          ) : (
+            <div>
+              {hierarchicalTypes.map(type => renderTypeItem(type))}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Product Information Form - Second Step */}
+      {selectedProductType && (
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Paso 2: Información del Producto</h2>
+          
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="label">Nombre *</label>
+              <input
+                {...register('name')}
+                type="text"
+                className="input"
+                placeholder="El nombre se genera automáticamente, pero puedes editarlo"
+              />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="label">Descripción</label>
+              <textarea
+                {...register('description')}
+                rows={3}
+                className="input"
+                placeholder="Descripción del producto"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">Código</label>
+                <input
+                  {...register('code')}
+                  type="text"
+                  className="input"
+                  placeholder="SKU-001"
+                />
+              </div>
+
+              <div>
+                <label className="label">Precio</label>
+                <input
+                  {...register('current_price', { valueAsNumber: true })}
+                  type="number"
+                  step="0.01"
+                  className="input"
+                  placeholder="0.00"
+                />
+                {errors.current_price && (
+                  <p className="mt-1 text-sm text-red-600">{errors.current_price.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">Stock</label>
+                <input
+                  {...register('current_stock', { valueAsNumber: true })}
+                  type="number"
+                  className="input"
+                  placeholder="0"
+                />
+                {errors.current_stock && (
+                  <p className="mt-1 text-sm text-red-600">{errors.current_stock.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="label">Estado</label>
+                <Controller
+                  name="is_active"
+                  control={control}
+                  render={({ field }) => (
+                    <select
+                      {...field}
+                      value={field.value ? 1 : 0}
+                      onChange={(e) => field.onChange(e.target.value === '1')}
+                      className="input"
+                    >
+                      <option value={1}>Activo</option>
+                      <option value={0}>Inactivo</option>
+                    </select>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Product Attributes */}
+            {selectedProductTypeAttributes && selectedProductTypeAttributes.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-900">Atributos del Producto</h3>
+                <div className="space-y-3">
+                  {selectedProductTypeAttributes.map((attribute) => (
+                    <div key={attribute.id}>
+                      <label className="label">{attribute.name}</label>
+                      <input
+                        type="text"
+                        className="input"
+                        placeholder={`Ingrese el valor para ${attribute.name}`}
+                        value={attributeValues[attribute.id] || ''}
+                        onChange={(e) => handleAttributeChange(attribute.id, e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 } 

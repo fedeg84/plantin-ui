@@ -262,6 +262,9 @@ export default function ProductsPage() {
                     Creado Por
                   </SortableTableHeader>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Atributos
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
@@ -299,6 +302,29 @@ export default function ProductsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.created_by_username}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {product.attributes && product.attributes.length > 0 ? (
+                        <div className="space-y-1">
+                          {product.attributes.slice(0, 3).map((attr, index) => (
+                            <div key={index} className="flex items-center space-x-1">
+                              <span className="text-xs font-medium text-gray-600 min-w-0 truncate">
+                                {attr.name}:
+                              </span>
+                              <span className="text-xs text-gray-900 min-w-0 truncate">
+                                {attr.value}
+                              </span>
+                            </div>
+                          ))}
+                          {product.attributes.length > 3 && (
+                            <div className="text-xs text-gray-500">
+                              +{product.attributes.length - 3} más...
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">Sin atributos</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button

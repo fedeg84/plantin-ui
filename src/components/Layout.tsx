@@ -8,7 +8,8 @@ import {
   Package, 
   ShoppingCart, 
   CreditCard, 
-  LogOut 
+  LogOut,
+  Tags
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -18,6 +19,7 @@ interface LayoutProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Tipos de Producto', href: '/product-types', icon: Tags },
   { name: 'Productos', href: '/products', icon: Package },
   { name: 'Ventas', href: '/sales', icon: ShoppingCart },
   { name: 'Métodos de Pago', href: '/payment-methods', icon: CreditCard },

@@ -29,8 +29,8 @@ export const DynamicAttributeFields: React.FC<DynamicAttributeFieldsProps> = ({
 
   // Set existing values when attributes load
   React.useEffect(() => {
-    if (attributes && existingValues) {
-      attributes.forEach(attr => {
+    if (attributes?.items && existingValues) {
+      attributes.items.forEach(attr => {
         const value = existingValues[attr.id];
         if (value !== undefined) {
           setValue(`attributes.${attr.id}`, value);
@@ -48,7 +48,7 @@ export const DynamicAttributeFields: React.FC<DynamicAttributeFieldsProps> = ({
     );
   }
 
-  if (!attributes || attributes.length === 0) {
+  if (!attributes?.items || attributes.items.length === 0) {
     return null;
   }
 
@@ -56,59 +56,18 @@ export const DynamicAttributeFields: React.FC<DynamicAttributeFieldsProps> = ({
     <div className="space-y-4">
       <h4 className="text-sm font-medium text-gray-900">Product Attributes</h4>
       
-      {attributes.map((attribute) => (
+      {attributes.items.map((attribute) => (
         <div key={attribute.id}>
           <label className="label">
             {attribute.name}
-            {attribute.is_required && <span className="text-red-500 ml-1">*</span>}
           </label>
           
-          {attribute.data_type === 'text' && (
-            <input
-              {...register(`attributes.${attribute.id}`, {
-                required: attribute.is_required ? `${attribute.name} is required` : false
-              })}
-              type="text"
-              className="input"
-              placeholder={`Enter ${attribute.name.toLowerCase()}`}
-            />
-          )}
-          
-          {attribute.data_type === 'number' && (
-            <input
-              {...register(`attributes.${attribute.id}`, {
-                required: attribute.is_required ? `${attribute.name} is required` : false,
-                valueAsNumber: true
-              })}
-              type="number"
-              step="0.01"
-              className="input"
-              placeholder={`Enter ${attribute.name.toLowerCase()}`}
-            />
-          )}
-          
-          {attribute.data_type === 'boolean' && (
-            <div className="flex items-center">
-              <input
-                {...register(`attributes.${attribute.id}`)}
-                type="checkbox"
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-              />
-              <label className="ml-2 text-sm text-gray-900">
-                {attribute.name}
-              </label>
-            </div>
-          )}
-          
-          {attribute.data_type === 'date' && (
-            <input
-              {...register(`attributes.${attribute.id}`, {
-                required: attribute.is_required ? `${attribute.name} is required` : false
-              })}
-              type="date"
-              className="input"
-            />
-          )}
+          <input
+            {...register(`attributes.${attribute.id}`)}
+            type="text"
+            className="input"
+            placeholder={`Enter ${attribute.name.toLowerCase()}`}
+          />
           
           {errors?.attributes?.[attribute.id] && (
             <p className="mt-1 text-sm text-red-600">

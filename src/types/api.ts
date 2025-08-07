@@ -17,7 +17,10 @@ export interface CreateProductRequest {
   price?: number;
   stock?: number;
   picture_id?: number;
-  attributes?: Record<number, string>; // attribute_id -> value
+  attributes?: Array<{
+    product_type_attribute_id: number;
+    value: string;
+  }>;
 }
 
 export interface CreateProductResponse {
@@ -26,20 +29,14 @@ export interface CreateProductResponse {
 
 export interface ProductAttributeValue {
   id?: number;
-  product_id: number;
-  product_type_attribute_id: number;
+  name: string;
   value?: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface ProductTypeAttribute {
   id: number;
   name: string;
   product_type_id: number;
-  data_type: 'text' | 'number' | 'boolean' | 'date';
-  is_required: boolean;
-  display_order: number;
   created_by: number;
   created_at: string;
   updated_at?: string;
@@ -59,7 +56,7 @@ export interface Product {
   picture_id?: number;
   current_price: number;
   current_stock: number;
-  attribute_values?: ProductAttributeValue[];
+  attributes?: ProductAttributeValue[];
 }
 
 export interface UpdateProductRequest {
@@ -70,7 +67,10 @@ export interface UpdateProductRequest {
   current_price?: number;
   current_stock?: number;
   is_active?: boolean;
-  attributes?: Record<number, string>; // attribute_id -> value
+  attributes?: Array<{
+    product_type_attribute_id: number;
+    value: string;
+  }>;
 }
 
 export interface FindProductsRequest {
@@ -129,6 +129,33 @@ export interface ProductType {
   created_at: string;
   created_by_id: number;
   created_by_username: string;
+}
+
+export interface CreateProductTypeRequest {
+  name: string;
+  description?: string;
+  parent_id?: number;
+  attributes?: CreateProductTypeAttributeRequest[];
+}
+
+export interface UpdateProductTypeRequest {
+  name: string;
+  description?: string;
+  parent_id?: number;
+  attributes?: UpdateProductTypeAttributeRequest[];
+}
+
+export interface UpdateProductTypeAttributeRequest {
+  id?: number;
+  name: string;
+}
+
+export interface CreateProductTypeAttributeRequest {
+  name: string;
+}
+
+export interface CreateProductTypeResponse {
+  id: number;
 }
 
 export interface FindProductTypesRequest {

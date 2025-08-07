@@ -39,6 +39,9 @@ export const productApi = {
     
   update: (id: number, data: UpdateProductRequest): Promise<Product> =>
     apiClient.put(`/products/${id}`, data).then(res => res.data),
+    
+  delete: (id: number): Promise<void> =>
+    apiClient.delete(`/products/${id}`).then(res => res.data),
 };
 
 // Product Type endpoints
@@ -46,8 +49,10 @@ export const productTypeApi = {
   find: (params: any): Promise<PaginatedResponse<any>> =>
     apiClient.get('/product-types', { params }).then(res => res.data),
     
-  getAttributes: (productTypeId: number): Promise<ProductTypeAttribute[]> =>
-    apiClient.get(`/product-types/${productTypeId}/attributes`).then(res => res.data),
+  getAttributes: (productTypeId: number, withParentAttributes: boolean = false): Promise<PaginatedResponse<ProductTypeAttribute>> =>
+    apiClient.get(`/product-types/${productTypeId}/attributes`, { 
+      params: { with_parent_attributes: withParentAttributes }
+    }).then(res => res.data),
 };
 
 // Payment Method endpoints
@@ -72,4 +77,7 @@ export const saleApi = {
   
   find: (params: FindSalesRequest): Promise<PaginatedResponse<Sale>> =>
     apiClient.get('/sales', { params }).then(res => res.data),
+    
+  delete: (id: number): Promise<void> =>
+    apiClient.delete(`/sales/${id}`).then(res => res.data),
 }; 

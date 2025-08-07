@@ -29,8 +29,8 @@ export const DynamicAttributeFields: React.FC<DynamicAttributeFieldsProps> = ({
 
   // Set existing values when attributes load
   React.useEffect(() => {
-    if (attributes && existingValues) {
-      attributes.forEach(attr => {
+    if (attributes?.items && existingValues) {
+      attributes.items.forEach(attr => {
         const value = existingValues[attr.id];
         if (value !== undefined) {
           setValue(`attributes.${attr.id}`, value);
@@ -48,7 +48,7 @@ export const DynamicAttributeFields: React.FC<DynamicAttributeFieldsProps> = ({
     );
   }
 
-  if (!attributes || attributes.length === 0) {
+  if (!attributes?.items || attributes.items.length === 0) {
     return null;
   }
 
@@ -56,7 +56,7 @@ export const DynamicAttributeFields: React.FC<DynamicAttributeFieldsProps> = ({
     <div className="space-y-4">
       <h4 className="text-sm font-medium text-gray-900">Product Attributes</h4>
       
-      {attributes.map((attribute) => (
+      {attributes.items.map((attribute) => (
         <div key={attribute.id}>
           <label className="label">
             {attribute.name}

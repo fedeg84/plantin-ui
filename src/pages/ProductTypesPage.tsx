@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
-  Edit, 
   Trash2, 
-  Eye,
   Package,
   ChevronLeft,
   ChevronRight
@@ -15,6 +13,7 @@ import { ProductType, FindProductTypesRequest } from '../types/api';
 import toast from 'react-hot-toast';
 
 export default function ProductTypesPage() {
+  const navigate = useNavigate();
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,7 +60,8 @@ export default function ProductTypesPage() {
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
-  const handleDelete = async (id: number, name: string) => {
+  const handleDelete = async (id: number, name: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click when clicking delete button
     if (!confirm(`¿Estás seguro de que quieres eliminar el tipo de producto "${name}"?`)) {
       return;
     }
@@ -74,6 +74,10 @@ export default function ProductTypesPage() {
       console.error('Error deleting product type:', error);
       toast.error('Error al eliminar el tipo de producto');
     }
+  };
+
+  const handleRowClick = (productTypeId: number) => {
+    navigate(`/product-types/${productTypeId}`);
   };
 
   const handleSort = (field: string) => {
@@ -188,7 +192,11 @@ export default function ProductTypesPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {productTypes.map((productType) => (
-                    <tr key={productType.id} className="hover:bg-gray-50">
+                    <tr 
+                      key={productType.id} 
+                      className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                      onClick={() => handleRowClick(productType.id)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{productType.name}</div>
                       </td>
@@ -212,29 +220,13 @@ export default function ProductTypesPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end space-x-2">
-                          <Link
-                            to={`/product-types/${productType.id}`}
-                            className="text-primary-600 hover:text-primary-900"
-                            title="Ver detalles"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                          <Link
-                            to={`/product-types/${productType.id}/edit`}
-                            className="text-blue-600 hover:text-blue-900"
-                            title="Editar"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(productType.id, productType.name)}
-                            className="text-red-600 hover:text-red-900"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
+                        <button
+                          onClick={(e) => handleDelete(productType.id, productType.name, e)}
+                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}

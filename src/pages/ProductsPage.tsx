@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { productApi, productTypeApi } from '../api/endpoints';
-import { Plus, Package, Edit, X } from 'lucide-react';
+import { Plus, Package, X, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ProductTypeSelector from '../components/ProductTypeSelector';
 import { FilterSortPanel } from '../components/FilterSortPanel';
@@ -25,7 +26,8 @@ const createProductSchema = z.object({
 type CreateProductForm = z.infer<typeof createProductSchema>;
 
 export default function ProductsPage() {
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
   const [search, setSearch] = useState('');
@@ -33,7 +35,6 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const [, setSelectedProductType] = useState<any>(null);
   const [selectedEditProductType, setSelectedEditProductType] = useState<any>(null);
   const queryClient = useQueryClient();
 
@@ -57,39 +58,13 @@ export default function ProductsPage() {
   });
 
   const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<CreateProductForm>({
-    resolver: zodResolver(createProductSchema),
-  });
-
-  const {
     register: registerEdit,
     handleSubmit: handleSubmitEdit,
     reset: resetEdit,
     setValue: setValueEdit,
-
     formState: { errors: errorsEdit },
   } = useForm<CreateProductForm>({
     resolver: zodResolver(createProductSchema),
-  });
-
-  const createMutation = useMutation({
-    mutationFn: productApi.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-      toast.success('Producto creado exitosamente');
-      reset();
-      setSelectedProductType(null);
-      setShowCreateForm(false);
-    },
-    onError: () => {
-      toast.error('Error al crear el producto');
-    },
   });
 
   const { data: editProductData } = useQuery({
@@ -97,6 +72,20 @@ export default function ProductsPage() {
     queryFn: () => productApi.getById(editingProduct!),
     enabled: !!editingProduct,
   });
+
+  // Read URL parameters and apply filters on component mount
+  useEffect(() => {
+    const typeIdsParam = searchParams.get('type_ids');
+    if (typeIdsParam) {
+      const typeIds = typeIdsParam.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      if (typeIds.length > 0) {
+        setFilters(prev => ({
+          ...prev,
+          type_ids: typeIds
+        }));
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (editProductData) {
@@ -130,19 +119,33 @@ export default function ProductsPage() {
     },
   });
 
-  const onSubmit = (data: CreateProductForm) => {
-    createMutation.mutate(data);
-  };
-
   const onSubmitEdit = (data: CreateProductForm) => {
     if (editingProduct) {
       updateMutation.mutate({ id: editingProduct, data });
     }
   };
 
-  const handleEdit = (product: any) => {
-    setEditingProduct(product.id);
-    setShowEditForm(true);
+
+
+  const handleDelete = async (id: number, name: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click when clicking delete button
+    if (!confirm(`¿Estás seguro de que quieres eliminar el producto "${name}"?`)) {
+      return;
+    }
+
+    try {
+      await productApi.delete(id);
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Producto eliminado correctamente');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Error al eliminar el producto');
+    }
+  };
+
+  const handleRowClick = (productId: number) => {
+    // Navigate to product detail page
+    window.location.href = `/products/${productId}`;
   };
 
   return (
@@ -155,7 +158,7 @@ export default function ProductsPage() {
           </p>
         </div>
         <button
-          onClick={() => setShowCreateForm(true)}
+          onClick={() => navigate('/products/create')}
           className="btn-primary flex items-center"
         >
           <Plus className="h-5 w-5 mr-2" />
@@ -182,120 +185,6 @@ export default function ProductsPage() {
         currentFilters={filters}
         onFiltersChange={setFilters}
       />
-
-      {/* Create Form Modal */}
-      {showCreateForm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-            
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Crear Nuevo Producto
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="label">Nombre *</label>
-                      <input
-                        {...register('name')}
-                        type="text"
-                        className="input"
-                        placeholder="Nombre del producto"
-                      />
-                      {errors.name && (
-                        <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="label">Descripción</label>
-                      <textarea
-                        {...register('description')}
-                        rows={3}
-                        className="input"
-                        placeholder="Descripción del producto"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="label">Código</label>
-                        <input
-                          {...register('code')}
-                          type="text"
-                          className="input"
-                          placeholder="SKU-001"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="label">Tipo de Producto *</label>
-                        <ProductTypeSelector
-                          value={watch('type_id')}
-                          onChange={(id, productType) => {
-                            setValue('type_id', id);
-                            setSelectedProductType(productType || null);
-                          }}
-                          error={errors.type_id?.message}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="label">Precio</label>
-                        <input
-                          {...register('price', { valueAsNumber: true })}
-                          type="number"
-                          step="0.01"
-                          className="input"
-                          placeholder="0.00"
-                        />
-                        {errors.price && (
-                          <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="label">Stock</label>
-                        <input
-                          {...register('stock', { valueAsNumber: true })}
-                          type="number"
-                          className="input"
-                          placeholder="0"
-                        />
-                        {errors.stock && (
-                          <p className="mt-1 text-sm text-red-600">{errors.stock.message}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                  <button
-                    type="submit"
-                    disabled={createMutation.isPending}
-                    className="btn-primary sm:ml-3 sm:w-auto w-full disabled:opacity-50"
-                  >
-                    {createMutation.isPending ? 'Creando...' : 'Crear Producto'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateForm(false)}
-                    className="btn-secondary sm:w-auto w-full mt-3 sm:mt-0"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Products List */}
       <div className="bg-white shadow rounded-lg">
@@ -379,7 +268,11 @@ export default function ProductsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {products?.items.map((product) => (
-                  <tr key={product.id}>
+                  <tr 
+                    key={product.id}
+                    className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                    onClick={() => handleRowClick(product.id)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900">
@@ -407,13 +300,13 @@ export default function ProductsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {product.created_by_username}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
-                        onClick={() => handleEdit(product)}
-                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Editar producto"
+                        onClick={(e) => handleDelete(product.id, product.name, e)}
+                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
+                        title="Eliminar"
                       >
-                        <Edit className="h-5 w-5" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </td>
                   </tr>
@@ -426,7 +319,7 @@ export default function ProductsPage() {
 
       {/* Edit Form Modal */}
       {showEditForm && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="fixed inset-0 z-40 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
 

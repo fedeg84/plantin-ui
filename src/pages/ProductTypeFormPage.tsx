@@ -9,6 +9,7 @@ import {
   Package
 } from 'lucide-react';
 import { productTypesApi } from '../api/productTypes';
+import { productTypeApi } from '../api/endpoints';
 import { 
   ProductType, 
   CreateProductTypeRequest, 
@@ -71,12 +72,16 @@ export default function ProductTypeFormPage() {
         parent_id: data.parent_id || undefined
       });
 
-      // Populate attributes
-      if (data.attributes) {
-        setAttributes(data.attributes.map(attr => ({
+      // Load attributes separately
+      try {
+        const attributes = await productTypeApi.getAttributes(productTypeId);
+        setAttributes(attributes.items.map((attr: any) => ({
           id: attr.id,
           name: attr.name
         })));
+      } catch (error) {
+        console.error('Error loading product type attributes:', error);
+        setAttributes([]);
       }
     } catch (error) {
       console.error('Error loading product type:', error);
@@ -140,7 +145,7 @@ export default function ProductTypeFormPage() {
         return;
       }
 
-      navigate('/product-types');
+      navigate(-1); // Volver a la página anterior
     } catch (error) {
       console.error('Error saving product type:', error);
       toast.error('Error al guardar el tipo de producto');

@@ -17,7 +17,10 @@ export interface CreateProductRequest {
   price?: number;
   stock?: number;
   picture_id?: number;
-  attributes?: Record<number, string>; // attribute_id -> value
+  attributes?: Array<{
+    product_type_attribute_id: number;
+    value: string;
+  }>;
 }
 
 export interface CreateProductResponse {
@@ -26,11 +29,8 @@ export interface CreateProductResponse {
 
 export interface ProductAttributeValue {
   id?: number;
-  product_id: number;
-  product_type_attribute_id: number;
+  name: string;
   value?: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface ProductTypeAttribute {
@@ -56,7 +56,7 @@ export interface Product {
   picture_id?: number;
   current_price: number;
   current_stock: number;
-  attribute_values?: ProductAttributeValue[];
+  attributes?: ProductAttributeValue[];
 }
 
 export interface UpdateProductRequest {
@@ -67,7 +67,10 @@ export interface UpdateProductRequest {
   current_price?: number;
   current_stock?: number;
   is_active?: boolean;
-  attributes?: Record<number, string>; // attribute_id -> value
+  attributes?: Array<{
+    product_type_attribute_id: number;
+    value: string;
+  }>;
 }
 
 export interface FindProductsRequest {
@@ -126,7 +129,6 @@ export interface ProductType {
   created_at: string;
   created_by_id: number;
   created_by_username: string;
-  attributes?: ProductTypeAttribute[];
 }
 
 export interface CreateProductTypeRequest {

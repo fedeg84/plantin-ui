@@ -176,6 +176,27 @@ export default function SalesPage() {
     createMutation.mutate(submitData);
   };
 
+  const handleDelete = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click when clicking delete button
+    if (!confirm(`¿Estás seguro de que quieres eliminar la venta #${id}?`)) {
+      return;
+    }
+
+    try {
+      await saleApi.delete(id);
+      queryClient.invalidateQueries({ queryKey: ['sales'] });
+      toast.success('Venta eliminada correctamente');
+    } catch (error) {
+      console.error('Error deleting sale:', error);
+      toast.error('Error al eliminar la venta');
+    }
+  };
+
+  const handleRowClick = (saleId: number) => {
+    // Navigate to sale detail page
+    window.location.href = `/sales/${saleId}`;
+  };
+
   return (
     <div>
       <div className="mb-8 flex justify-between items-center">
@@ -606,11 +627,18 @@ export default function SalesPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Productos
                   </th>
+                  <th className="relative px-6 py-3">
+                    <span className="sr-only">Acciones</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {sales?.items.map((sale) => (
-                  <tr key={sale.id}>
+                  <tr 
+                    key={sale.id}
+                    className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                    onClick={() => handleRowClick(sale.id)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       #{sale.id}
                     </td>
@@ -652,6 +680,15 @@ export default function SalesPage() {
                           </div>
                         ))}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={(e) => handleDelete(sale.id, e)}
+                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}

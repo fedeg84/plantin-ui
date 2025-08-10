@@ -9,7 +9,7 @@ import { Plus, ShoppingCart, Trash2, Calculator, ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast';
 import ProductSelector from '../components/ProductSelector';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
-import { Product, PaymentMethod } from '../types/api';
+import { Product } from '../types/api';
 import { useNavigate } from 'react-router-dom';
 
 const createSaleSchema = z.object({
@@ -33,15 +33,7 @@ export default function CreateSalePage() {
   const [selectedProducts, setSelectedProducts] = useState<{[key: number]: Product}>({});
   const queryClient = useQueryClient();
 
-  const { data: products } = useQuery({
-    queryKey: ['products-filter'],
-    queryFn: () => productApi.find({ size: 100, is_active: true }),
-  });
 
-  const { data: paymentMethods } = useQuery({
-    queryKey: ['payment-methods-filter'],
-    queryFn: () => paymentMethodApi.find({ size: 50, is_active: true }),
-  });
 
   const createMutation = useMutation({
     mutationFn: (data: any) => saleApi.create(data),

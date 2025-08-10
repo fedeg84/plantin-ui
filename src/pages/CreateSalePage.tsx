@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import React from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { saleApi, productApi, paymentMethodApi } from '../api/endpoints';
+import { saleApi } from '../api/endpoints';
 import { Plus, ShoppingCart, Trash2, Calculator, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ProductSelector from '../components/ProductSelector';

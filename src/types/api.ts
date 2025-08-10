@@ -173,18 +173,32 @@ export interface CreateSaleItemRequest {
   price?: number;
 }
 
+export interface CreateSalePaymentMethodRequest {
+  payment_method_id: number;
+  amount: number;
+  discount?: number;
+}
+
 export interface CreateSaleRequest {
   description?: string;
   sale_items: CreateSaleItemRequest[];
   price?: number;
-  discount?: number;
   user_id?: number;
   date?: string;
-  payment_method_id?: number;
+  payment_methods: CreateSalePaymentMethodRequest[];
 }
 
 export interface CreateSaleResponse {
   id: number;
+}
+
+export interface SalePaymentMethod {
+  id: number;
+  payment_method_id: number;
+  payment_method_name: string;
+  amount: number;
+  discount: number;
+  discount_percentage: number;
 }
 
 export interface Sale {
@@ -192,10 +206,8 @@ export interface Sale {
   time: string;
   created_by_id: number;
   created_by_username: string;
-  payment_method_id: number;
-  payment_method_name: string;
   total_price: number;
-  discount: number;
+  payment_methods: SalePaymentMethod[];
   items: SaleItem[];
 }
 

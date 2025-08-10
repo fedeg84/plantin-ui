@@ -11,6 +11,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import EditProductPage from './pages/EditProductPage';
 import CreateProductPage from './pages/CreateProductPage';
 import SalesPage from './pages/SalesPage';
+import CreateSalePage from './pages/CreateSalePage';
 import PaymentMethodsPage from './pages/PaymentMethodsPage';
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/products/:id/edit" element={<EditProductPage />} />
         <Route path="/products/create" element={<CreateProductPage />} />
         <Route path="/sales" element={<SalesPage />} />
+        <Route path="/sales/create" element={<CreateSalePage />} />
         <Route path="/payment-methods" element={<PaymentMethodsPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -10,7 +9,7 @@ import { Plus, ShoppingCart, Trash2, Calculator, ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast';
 import ProductSelector from '../components/ProductSelector';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
-import { Product, Sale } from '../types/api';
+import { Product } from '../types/api';
 
 const editSaleSchema = z.object({
   description: z.string().optional(),
@@ -99,7 +98,7 @@ export default function EditSalePage() {
       }));
 
              // Set form values
-       setValue('description', sale.description || '');
+       setValue('description', '');
        setValue('price', sale.total_price || 0);
        
        // Replace fields with useFieldArray

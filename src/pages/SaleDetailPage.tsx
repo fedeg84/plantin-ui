@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Edit, Trash2, ShoppingCart, DollarSign, Clock, User } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, DollarSign, Clock, User } from 'lucide-react';
 import { saleApi } from '../api/endpoints';
 import toast from 'react-hot-toast';
 

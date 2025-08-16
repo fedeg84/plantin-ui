@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, ShoppingCart, DollarSign, Users, Settings, Package, CreditCard } from 'lucide-react';
+import { Plus, ShoppingCart, DollarSign, Users, Package, CreditCard } from 'lucide-react';
 import { saleApi } from '../api/endpoints';
 import { Sale } from '../types/api';
 

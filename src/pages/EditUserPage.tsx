@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { userApi } from '../api/endpoints';
-import { UpdateUserRequest, User } from '../types/api';
+import { UpdateUserRequest } from '../types/api';
 import { ArrowLeft, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProfileImageUpload from '../components/ProfileImageUpload';
@@ -31,7 +31,6 @@ const EditUserPage: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
     setValue,
   } = useForm<UpdateUserFormData>({
     resolver: zodResolver(updateUserSchema),
@@ -75,7 +74,7 @@ const EditUserPage: React.FC = () => {
       username: data.username,
       role: data.role,
       is_active: data.is_active,
-      picture_id: profileImageId,
+      picture_id: profileImageId || undefined,
     };
     
     if (data.password && data.password.trim()) {
@@ -174,7 +173,7 @@ const EditUserPage: React.FC = () => {
                 Foto de Perfil (Opcional)
               </label>
               <ProfileImageUpload
-                currentImageId={profileImageId}
+                currentImageId={profileImageId || undefined}
                 onImageChange={setProfileImageId}
                 disabled={isSubmitting || updateUserMutation.isPending}
               />

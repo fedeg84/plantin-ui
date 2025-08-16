@@ -11,7 +11,6 @@ import {
   LogOut,
   Tags,
   Settings,
-  Users,
   User
 } from 'lucide-react';
 import { cn } from '../utils/cn';

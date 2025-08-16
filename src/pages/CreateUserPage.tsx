@@ -27,8 +27,7 @@ const CreateUserPage: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
+    formState: { errors, isSubmitting }
   } = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
@@ -52,7 +51,7 @@ const CreateUserPage: React.FC = () => {
   const onSubmit = (data: CreateUserFormData) => {
     const createData: CreateUserRequest = {
       ...data,
-      picture_id: profileImageId,
+      picture_id: profileImageId || undefined,
     };
     createUserMutation.mutate(createData);
   };

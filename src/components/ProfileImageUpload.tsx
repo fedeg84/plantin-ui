@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { fileApi } from '../api/endpoints';
-import { Upload, X, User, Camera } from 'lucide-react';
+import { X, User, Camera } from 'lucide-react';
 
 interface ProfileImageUploadProps {
   currentImageId?: number;

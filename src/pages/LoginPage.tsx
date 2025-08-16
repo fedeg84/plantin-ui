@@ -30,6 +30,7 @@ export default function LoginPage() {
   const mutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
+      console.log('Login response:', data); // Debug log
       login(data.token);
       toast.success('¡Bienvenido!');
     },

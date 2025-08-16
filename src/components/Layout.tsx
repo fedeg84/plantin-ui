@@ -4,12 +4,15 @@ import { useAuthStore } from '../store/authStore';
 import { 
   Menu, 
   X, 
-  Home, 
+  Plus, 
   Package, 
   ShoppingCart, 
   CreditCard, 
   LogOut,
-  Tags
+  Tags,
+  Settings,
+  Users,
+  User
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -17,18 +20,38 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Tipos de Producto', href: '/product-types', icon: Tags },
-  { name: 'Productos', href: '/products', icon: Package },
-  { name: 'Ventas', href: '/sales', icon: ShoppingCart },
-  { name: 'Métodos de Pago', href: '/payment-methods', icon: CreditCard },
-];
-
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [forceAdmin, setForceAdmin] = useState(false);
   const location = useLocation();
   const logout = useAuthStore((state) => state.logout);
+  const isAdmin = useAuthStore((state) => state.isAdmin);
+
+  const navigation = [
+    { name: 'Nueva Venta', href: '/sales/create', icon: Plus },
+    { name: 'Ventas', href: '/sales', icon: ShoppingCart },
+    { name: 'Productos', href: '/products', icon: Package },
+    { name: 'Tipos de Producto', href: '/product-types', icon: Tags },
+    { name: 'Métodos de Pago', href: '/payment-methods', icon: CreditCard },
+  ];
+
+  const adminNavigation = [
+    { name: 'Panel de Admin', href: '/admin/dashboard', icon: Settings },
+  ];
+
+  const adminStatus = isAdmin();
+  const user = useAuthStore.getState().getUser();
+  console.log('Admin status:', adminStatus, 'User:', user); // Debug log
+  
+  // Temporary function to force admin mode for testing
+  const forceAdminMode = () => {
+    setForceAdmin(true);
+    console.log('Admin mode forced!');
+  };
+  
+  const finalAdminStatus = adminStatus || forceAdmin;
+  
+  const allNavigation = finalAdminStatus ? [...navigation, ...adminNavigation] : navigation;
 
   return (
     <div className="h-full flex">
@@ -59,9 +82,18 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
             <div className="flex-shrink-0 flex items-center px-4">
               <h1 className="text-2xl font-bold text-primary-600">Plantin</h1>
+              {!finalAdminStatus && (
+                <button
+                  onClick={forceAdminMode}
+                  className="ml-4 px-2 py-1 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                  title="Forzar modo admin (solo para testing)"
+                >
+                  Forzar Admin
+                </button>
+              )}
             </div>
             <nav className="mt-5 px-2 space-y-1">
-              {navigation.map((item) => {
+              {allNavigation.map((item) => {
                 const isActive = location.pathname === item.href;
                 return (
                   <Link
@@ -82,10 +114,17 @@ export default function Layout({ children }: LayoutProps) {
             </nav>
           </div>
           
-          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
+          <div className="flex-shrink-0 border-t border-gray-200 p-4 space-y-2">
+            <Link
+              to="/profile"
+              className="flex items-center text-gray-600 hover:text-gray-900 w-full"
+            >
+              <User className="mr-3 h-5 w-5" />
+              Mi Perfil
+            </Link>
             <button
               onClick={logout}
-              className="flex items-center text-gray-600 hover:text-gray-900"
+              className="flex items-center text-gray-600 hover:text-gray-900 w-full"
             >
               <LogOut className="mr-3 h-5 w-5" />
               Cerrar Sesión
@@ -99,11 +138,20 @@ export default function Layout({ children }: LayoutProps) {
         <div className="flex flex-col w-64">
           <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
             <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-              <div className="flex items-center flex-shrink-0 px-4">
+                                                                                                           <div className="flex items-center flex-shrink-0 px-4">
                 <h1 className="text-2xl font-bold text-primary-600">Plantin</h1>
+                {!finalAdminStatus && (
+                  <button
+                    onClick={forceAdminMode}
+                    className="ml-4 px-2 py-1 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                    title="Forzar modo admin (solo para testing)"
+                  >
+                    Forzar Admin
+                  </button>
+                )}
               </div>
               <nav className="mt-5 flex-1 px-2 bg-white space-y-1">
-                {navigation.map((item) => {
+                {allNavigation.map((item) => {
                   const isActive = location.pathname === item.href;
                   return (
                     <Link
@@ -124,10 +172,17 @@ export default function Layout({ children }: LayoutProps) {
               </nav>
             </div>
             
-            <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
+            <div className="flex-shrink-0 border-t border-gray-200 p-4 space-y-2">
+              <Link
+                to="/profile"
+                className="flex items-center text-gray-600 hover:text-gray-900 w-full"
+              >
+                <User className="mr-3 h-5 w-5" />
+                Mi Perfil
+              </Link>
               <button
                 onClick={logout}
-                className="flex items-center text-gray-600 hover:text-gray-900"
+                className="flex items-center text-gray-600 hover:text-gray-900 w-full"
               >
                 <LogOut className="mr-3 h-5 w-5" />
                 Cerrar Sesión

@@ -241,6 +241,44 @@ export interface PaginationInfo {
   total_items: number;
 }
 
+// User types
+export interface CreateUserRequest {
+  name: string;
+  username: string;
+  password: string;
+  picture_id?: number;
+  role: 'ADMIN' | 'USER';
+}
+
+export interface UpdateUserRequest {
+  name: string;
+  username: string;
+  password?: string;
+  picture_id?: number;
+  role: 'ADMIN' | 'USER';
+  is_active?: boolean;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  username: string;
+  role: 'ADMIN' | 'USER';
+  is_active: boolean;
+  created_at: string;
+  picture_id?: number;
+}
+
+export interface FindUsersRequest {
+  search?: string;
+  page?: number;
+  size?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  role?: 'ADMIN' | 'USER';
+  is_active?: boolean;
+}
+
 export interface PaginatedResponse<T> {
   items: T[];
   pagination: PaginationInfo;

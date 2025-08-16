@@ -29,18 +29,28 @@ export default function ProductSelector({ value, onChange, placeholder = "Selecc
     enabled: isOpen || !!search,
   });
 
+  // Query to get the selected product details
+  const { data: selectedProductData } = useQuery({
+    queryKey: ['product', value],
+    queryFn: () => productApi.getById(value!),
+    enabled: !!value,
+  });
+
   // Find selected product when value changes
   useEffect(() => {
-    if (value && value > 0 && products?.items) {
-      const product = products.items.find(p => p.id === value);
-      if (product) {
-        setSelectedProduct(product);
+    if (value) {
+      if (selectedProductData && selectedProductData.is_active) {
+        // Solo mostrar si el producto está activo
+        setSelectedProduct(selectedProductData);
+      } else if (selectedProductData && !selectedProductData.is_active) {
+        // Si el producto está inactivo, limpiar la selección
+        setSelectedProduct(null);
+        onChange(0, undefined);
       }
-    } else if (!value || value === 0) {
-      // Clear selected product when value is 0 or falsy
+    } else {
       setSelectedProduct(null);
     }
-  }, [value, products]);
+  }, [value, selectedProductData, onChange]);
 
   const handleSelect = (product: Product) => {
     setSelectedProduct(product);

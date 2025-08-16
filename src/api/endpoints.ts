@@ -78,6 +78,12 @@ export const saleApi = {
   find: (params: FindSalesRequest): Promise<PaginatedResponse<Sale>> =>
     apiClient.get('/sales', { params }).then(res => res.data),
     
+  getById: (id: number): Promise<Sale> =>
+    apiClient.get(`/sales/${id}`).then(res => res.data),
+    
+  update: (id: number, data: CreateSaleRequest): Promise<Sale> =>
+    apiClient.put(`/sales/${id}`, data).then(res => res.data),
+    
   delete: (id: number): Promise<void> =>
     apiClient.delete(`/sales/${id}`).then(res => res.data),
 }; 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { saleApi, productApi, paymentMethodApi } from '../api/endpoints';
-import { Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { Plus, ShoppingCart, Trash2, Eye, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { FilterSortPanel } from '../components/FilterSortPanel';
 import { SortableTableHeader } from '../components/SortableTableHeader';
@@ -65,8 +65,14 @@ export default function SalesPage() {
     }
   };
 
-  const handleRowClick = (saleId: number) => {
-    window.location.href = `/sales/${saleId}`;
+  const handleView = (saleId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/sales/${saleId}`);
+  };
+
+  const handleEdit = (saleId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/sales/${saleId}/edit`);
   };
 
   return (
@@ -225,8 +231,7 @@ export default function SalesPage() {
                 {sales?.items.map((sale) => (
                   <tr 
                     key={sale.id}
-                    className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                    onClick={() => handleRowClick(sale.id)}
+                    className="hover:bg-gray-50 transition-colors duration-150"
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       #{sale.id}
@@ -283,13 +288,29 @@ export default function SalesPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={(e) => handleDelete(sale.id, e)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-end space-x-2">
+                        <button
+                          onClick={(e) => handleView(sale.id, e)}
+                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors duration-150"
+                          title="Ver detalles"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => handleEdit(sale.id, e)}
+                          className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors duration-150"
+                          title="Editar"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDelete(sale.id, e)}
+                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

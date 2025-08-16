@@ -112,26 +112,10 @@ export default function CreateProductPage() {
     return rootTypes;
   };
 
-  // Get full hierarchy name for a product type
-  const getHierarchyName = (typeId: number, types: ProductType[]): string => {
+  // Get only the final type name (not the full hierarchy)
+  const getTypeName = (typeId: number, types: ProductType[]): string => {
     const type = types.find(t => t.id === typeId);
-    if (!type) return '';
-    
-    const hierarchy: string[] = [type.name];
-    let currentType = type;
-    
-    // Traverse up the hierarchy
-    while (currentType.parent_id) {
-      const parent = types.find(t => t.id === currentType.parent_id);
-      if (parent) {
-        hierarchy.unshift(parent.name);
-        currentType = parent;
-      } else {
-        break;
-      }
-    }
-    
-    return hierarchy.join(' ');
+    return type ? type.name : '';
   };
 
   const hierarchicalTypes = productTypes ? buildHierarchy(productTypes.items) : [];
@@ -167,9 +151,9 @@ export default function CreateProductPage() {
     if (actualProductType) {
       setSelectedProductType(actualProductType);
       
-      // Auto-generate name from hierarchy
-      const hierarchyName = getHierarchyName(type.id, productTypes?.items || []);
-      setValue('name', hierarchyName);
+      // Auto-generate name from type (only the final type name)
+      const typeName = getTypeName(type.id, productTypes?.items || []);
+      setValue('name', typeName);
       
       // Load attributes separately (including parent attributes for product creation)
       try {

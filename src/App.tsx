@@ -3,6 +3,7 @@ import { useAuthStore } from './store/authStore';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+
 import ProductTypesPage from './pages/ProductTypesPage';
 import ProductTypeDetailPage from './pages/ProductTypeDetailPage';
 import ProductTypeFormPage from './pages/ProductTypeFormPage';
@@ -12,6 +13,8 @@ import EditProductPage from './pages/EditProductPage';
 import CreateProductPage from './pages/CreateProductPage';
 import SalesPage from './pages/SalesPage';
 import CreateSalePage from './pages/CreateSalePage';
+import SaleDetailPage from './pages/SaleDetailPage';
+import EditSalePage from './pages/EditSalePage';
 import PaymentMethodsPage from './pages/PaymentMethodsPage';
 
 function App() {
@@ -26,6 +29,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+
         <Route path="/product-types" element={<ProductTypesPage />} />
         <Route path="/product-types/create" element={<ProductTypeFormPage />} />
         <Route path="/product-types/:id" element={<ProductTypeDetailPage />} />
@@ -36,6 +40,8 @@ function App() {
         <Route path="/products/create" element={<CreateProductPage />} />
         <Route path="/sales" element={<SalesPage />} />
         <Route path="/sales/create" element={<CreateSalePage />} />
+        <Route path="/sales/:id" element={<SaleDetailPage />} />
+        <Route path="/sales/:id/edit" element={<EditSalePage />} />
         <Route path="/payment-methods" element={<PaymentMethodsPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

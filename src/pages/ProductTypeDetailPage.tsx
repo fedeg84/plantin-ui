@@ -194,7 +194,7 @@ export default function ProductTypeDetailPage() {
                           {attribute.name}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {attribute.attribute_type}
+                          Atributo
                         </span>
                       </div>
                     </div>

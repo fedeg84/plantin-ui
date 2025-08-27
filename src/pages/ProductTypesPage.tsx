@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
+  Edit,
   Trash2, 
   Package,
+  Tags,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -60,9 +62,9 @@ export default function ProductTypesPage() {
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
-  const handleDelete = async (id: number, name: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent row click when clicking delete button
-    if (!confirm(`¿Estás seguro de que quieres eliminar el tipo de producto "${name}"?`)) {
+    if (!confirm(`¿Estás seguro de que quieres eliminar este tipo de producto?`)) {
       return;
     }
 
@@ -360,14 +362,14 @@ export default function ProductTypesPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Atributos:</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {productType.attributes?.length || 0}
+                    0
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Creado por:</span>
                   <span className="text-sm text-gray-900">
-                    {productType.created_by}
+                    {productType.created_by_username}
                   </span>
                 </div>
                 
@@ -378,21 +380,7 @@ export default function ProductTypesPage() {
                   </span>
                 </div>
                 
-                {productType.attributes && productType.attributes.length > 0 && (
-                  <div className="pt-2 border-t">
-                    <span className="text-sm text-gray-500 block mb-1">Lista de atributos:</span>
-                    <div className="flex flex-wrap gap-1">
-                      {productType.attributes.map((attr) => (
-                        <span 
-                          key={attr.id} 
-                          className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
-                        >
-                          {attr.name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Attributes would be loaded separately if needed */}
               </div>
             </div>
           ))

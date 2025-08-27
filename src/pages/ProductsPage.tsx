@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { productApi, productTypeApi } from '../api/endpoints';
-import { Plus, Package, X, Trash2 } from 'lucide-react';
+import { Plus, Package, X, Trash2, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ProductTypeSelector from '../components/ProductTypeSelector';
 import { FilterSortPanel } from '../components/FilterSortPanel';
@@ -387,10 +387,9 @@ export default function ProductsPage() {
                       resetEdit({
                         name: product.name,
                         code: product.code,
-                        product_type_id: product.product_type.id,
+                        type_id: product.type_id,
                         current_price: product.current_price,
-                        current_stock: product.current_stock,
-                        image_url: product.image_url || ''
+                        current_stock: product.current_stock
                       });
                     }}
                     className="p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded transition-colors duration-150"
@@ -419,14 +418,14 @@ export default function ProductsPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Tipo:</span>
                   <span className="text-sm text-gray-900">
-                    {product.product_type.name}
+                    {product.type_name}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Creado por:</span>
                   <span className="text-sm text-gray-900">
-                    {product.created_by}
+                    {product.created_by_username}
                   </span>
                 </div>
                 
@@ -434,9 +433,9 @@ export default function ProductsPage() {
                   <div className="pt-2 border-t">
                     <span className="text-sm text-gray-500 block mb-1">Atributos:</span>
                     <div className="space-y-1">
-                      {product.attributes.map((attr) => (
+                      {product.attributes?.map((attr) => (
                         <div key={attr.id} className="flex justify-between text-sm">
-                          <span className="text-gray-600">{attr.product_type_attribute.name}:</span>
+                          <span className="text-gray-600">{attr.name}:</span>
                           <span className="text-gray-900">{attr.value}</span>
                         </div>
                       ))}

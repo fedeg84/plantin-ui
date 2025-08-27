@@ -347,7 +347,7 @@ export default function SalesPage() {
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mb-1">
-                    Vendedor: {sale.created_by}
+                    Vendedor: {sale.created_by_username}
                   </p>
                   <p className="text-lg font-semibold text-green-600">
                     ${sale.total_price.toFixed(2)}
@@ -381,7 +381,7 @@ export default function SalesPage() {
               <div className="mt-4 border-t pt-3">
                 <h4 className="text-sm font-medium text-gray-900 mb-2">Productos:</h4>
                 <div className="space-y-1">
-                  {sale.sale_items.map((item) => (
+                  {sale.items.map((item) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <span className="text-gray-600">
                         {item.product.name} x{item.quantity}
@@ -397,9 +397,9 @@ export default function SalesPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Métodos de pago:</span>
                     <div className="text-right">
-                      {sale.payment_methods.map((pm, index) => (
+                      {sale.payment_methods.map((pm) => (
                         <div key={pm.id} className="text-gray-900">
-                          {pm.name}: ${pm.amount.toFixed(2)}
+                          {pm.payment_method_name}: ${pm.amount.toFixed(2)}
                         </div>
                       ))}
                     </div>

@@ -50,7 +50,10 @@ const CreateUserPage: React.FC = () => {
 
   const onSubmit = (data: CreateUserFormData) => {
     const createData: CreateUserRequest = {
-      ...data,
+      name: data.name,
+      username: data.username,
+      password: data.password,
+      role: data.role,
       picture_id: profileImageId || undefined,
     };
     createUserMutation.mutate(createData);

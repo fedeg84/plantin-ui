@@ -49,13 +49,15 @@ const CreateUserPage: React.FC = () => {
   });
 
   const onSubmit = (data: CreateUserFormData) => {
+    console.log('🔍 DEBUG - profileImageId:', profileImageId);
     const createData: CreateUserRequest = {
       name: data.name,
       username: data.username,
       password: data.password,
       role: data.role,
-      picture_id: profileImageId || undefined,
+      ...(profileImageId && { picture_id: profileImageId }),
     };
+    console.log('🔍 DEBUG - createData:', createData);
     createUserMutation.mutate(createData);
   };
 

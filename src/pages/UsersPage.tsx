@@ -138,8 +138,8 @@ const UsersPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      {/* Desktop Table - Hidden on mobile */}
+      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -304,6 +304,111 @@ const UsersPage: React.FC = () => {
                   </button>
                 </nav>
               </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Cards - Hidden on desktop */}
+      <div className="md:hidden space-y-4">
+        {isLoading ? (
+          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+            Cargando usuarios...
+          </div>
+        ) : usersData?.items.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+            No se encontraron usuarios
+          </div>
+        ) : (
+          usersData?.items.map((user: User) => (
+            <div key={user.id} className={`bg-white rounded-lg shadow p-4 ${!user.is_active ? 'opacity-50' : ''}`}>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                  <UserAvatar 
+                    pictureId={user.picture_id} 
+                    username={user.username} 
+                    size="medium" 
+                  />
+                  <div>
+                    <h3 className={`text-lg font-medium ${user.is_active ? 'text-gray-900' : 'text-gray-400'}`}>
+                      {user.name}
+                    </h3>
+                    <p className={`text-sm ${user.is_active ? 'text-gray-500' : 'text-gray-400'}`}>
+                      @{user.username}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => navigate(`/admin/users/${user.id}`)}
+                    className={`p-2 ${user.is_active ? 'text-blue-600 hover:text-blue-900' : 'text-gray-400 hover:text-gray-500'}`}
+                    title="Ver detalles"
+                  >
+                    <Eye className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => navigate(`/admin/users/${user.id}/edit`)}
+                    className={`p-2 ${user.is_active ? 'text-indigo-600 hover:text-indigo-900' : 'text-gray-400 hover:text-gray-500'}`}
+                    title="Editar"
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    className={`p-2 ${user.is_active ? 'text-red-600 hover:text-red-900' : 'text-gray-400 hover:text-gray-500'}`}
+                    title="Eliminar"
+                    disabled={deleteUserMutation.isPending}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Rol:</span>
+                  {getRoleBadge(user.role)}
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Estado:</span>
+                  {getStatusBadge(user.is_active)}
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Creado:</span>
+                  <span className={`text-sm ${user.is_active ? 'text-gray-900' : 'text-gray-400'}`}>
+                    {new Date(user.created_at).toLocaleDateString('es-ES')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+
+        {/* Mobile Pagination */}
+        {usersData && usersData.pagination.total_pages > 1 && (
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => handlePageChange(searchParams.page! - 1)}
+                disabled={searchParams.page === 0}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              
+              <span className="text-sm text-gray-700">
+                Página {searchParams.page! + 1} de {usersData.pagination.total_pages}
+              </span>
+              
+              <button
+                onClick={() => handlePageChange(searchParams.page! + 1)}
+                disabled={searchParams.page === usersData.pagination.total_pages - 1}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Siguiente
+              </button>
             </div>
           </div>
         )}

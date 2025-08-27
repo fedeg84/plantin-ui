@@ -77,6 +77,7 @@ export default function Layout({ children }: LayoutProps) {
                   <Link
                     key={item.name}
                     to={item.href}
+                    onClick={() => setSidebarOpen(false)}
                     className={cn(
                       'group flex items-center px-2 py-2 text-base font-medium rounded-md',
                       isActive
@@ -95,13 +96,17 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex-shrink-0 border-t border-gray-200 p-4 space-y-2">
             <Link
               to="/profile"
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center text-gray-600 hover:text-gray-900 w-full"
             >
               <User className="mr-3 h-5 w-5" />
               Mi Perfil
             </Link>
             <button
-              onClick={logout}
+              onClick={() => {
+                setSidebarOpen(false);
+                logout();
+              }}
               className="flex items-center text-gray-600 hover:text-gray-900 w-full"
             >
               <LogOut className="mr-3 h-5 w-5" />

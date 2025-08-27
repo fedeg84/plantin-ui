@@ -197,7 +197,8 @@ export default function ProductDetailPage() {
            })() && (
              <div className="bg-white shadow rounded-lg p-6">
                <h2 className="text-lg font-medium text-gray-900 mb-4">Atributos</h2>
-              <div className="overflow-x-auto">
+              {/* Desktop Attributes Table - Hidden on mobile */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -227,6 +228,22 @@ export default function ProductDetailPage() {
                      })}
                    </tbody>
                 </table>
+              </div>
+              
+              {/* Mobile Attributes Cards - Hidden on desktop */}
+              <div className="md:hidden space-y-3">
+                {product.attributes?.map((attributeValue) => (
+                  <div key={attributeValue.id} className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-900">
+                        {attributeValue.product_type_attribute.name}
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        {attributeValue.value}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}

@@ -128,8 +128,8 @@ export default function ProductTypesPage() {
         </div>
       </div>
 
-      {/* Product Types List */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      {/* Desktop Product Types Table - Hidden on mobile */}
+      <div className="hidden md:block bg-white shadow rounded-lg overflow-hidden">
         {loading ? (
           <div className="p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -301,6 +301,128 @@ export default function ProductTypesPage() {
               </div>
             )}
           </>
+        )}
+      </div>
+
+      {/* Mobile Product Types Cards - Hidden on desktop */}
+      <div className="md:hidden space-y-4">
+        {loading ? (
+          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-2">Cargando tipos de producto...</p>
+          </div>
+        ) : productTypes.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-4 text-center">
+            <Tags className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Sin tipos de producto</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {searchTerm ? 'No se encontraron tipos de producto con ese criterio de búsqueda.' : 'Comienza creando tu primer tipo de producto.'}
+            </p>
+          </div>
+        ) : (
+          productTypes.map((productType) => (
+            <div 
+              key={productType.id} 
+              className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleRowClick(productType.id)}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {productType.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {productType.description}
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/product-types/${productType.id}/edit`);
+                    }}
+                    className="p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded transition-colors duration-150"
+                    title="Editar"
+                  >
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(productType.id, e)}
+                    className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-150"
+                    title="Eliminar"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Atributos:</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {productType.attributes?.length || 0}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Creado por:</span>
+                  <span className="text-sm text-gray-900">
+                    {productType.created_by}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Fecha de creación:</span>
+                  <span className="text-sm text-gray-900">
+                    {new Date(productType.created_at).toLocaleDateString('es-ES')}
+                  </span>
+                </div>
+                
+                {productType.attributes && productType.attributes.length > 0 && (
+                  <div className="pt-2 border-t">
+                    <span className="text-sm text-gray-500 block mb-1">Lista de atributos:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {productType.attributes.map((attr) => (
+                        <span 
+                          key={attr.id} 
+                          className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
+                        >
+                          {attr.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+
+        {/* Mobile Pagination */}
+        {totalPages > 1 && (
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                disabled={currentPage === 0}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Anterior
+              </button>
+              
+              <span className="text-sm text-gray-700">
+                Página {currentPage + 1} de {totalPages}
+              </span>
+              
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                disabled={currentPage === totalPages - 1}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

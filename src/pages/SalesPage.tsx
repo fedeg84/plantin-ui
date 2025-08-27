@@ -152,8 +152,8 @@ export default function SalesPage() {
         onFiltersChange={setFilters}
       />
 
-      {/* Sales List */}
-      <div className="bg-white shadow rounded-lg">
+      {/* Desktop Sales Table - Hidden on mobile */}
+      <div className="hidden md:block bg-white shadow rounded-lg">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -317,6 +317,97 @@ export default function SalesPage() {
               </tbody>
             </table>
           </div>
+        )}
+      </div>
+
+      {/* Mobile Sales Cards - Hidden on desktop */}
+      <div className="md:hidden space-y-4">
+        {isLoading ? (
+          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-2">Cargando ventas...</p>
+          </div>
+        ) : sales?.items.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-4 text-center">
+            <ShoppingCart className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Sin ventas</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Comienza registrando tu primera venta.
+            </p>
+          </div>
+        ) : (
+          sales?.items.map((sale) => (
+            <div key={sale.id} className="bg-white rounded-lg shadow p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h3 className="text-lg font-medium text-gray-900">Venta #{sale.id}</h3>
+                    <span className="text-sm text-gray-500">
+                      {new Date(sale.time).toLocaleDateString('es-ES')}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-1">
+                    Vendedor: {sale.created_by}
+                  </p>
+                  <p className="text-lg font-semibold text-green-600">
+                    ${sale.total_price.toFixed(2)}
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={(e) => handleView(sale.id, e)}
+                    className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition-colors duration-150"
+                    title="Ver detalles"
+                  >
+                    <Eye className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={(e) => handleEdit(sale.id, e)}
+                    className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded transition-colors duration-150"
+                    title="Editar"
+                  >
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(sale.id, e)}
+                    className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-150"
+                    title="Eliminar"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mt-4 border-t pt-3">
+                <h4 className="text-sm font-medium text-gray-900 mb-2">Productos:</h4>
+                <div className="space-y-1">
+                  {sale.sale_items.map((item) => (
+                    <div key={item.id} className="flex justify-between text-sm">
+                      <span className="text-gray-600">
+                        {item.product.name} x{item.quantity}
+                      </span>
+                      <span className="text-gray-900 font-medium">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-3 pt-2 border-t">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Métodos de pago:</span>
+                    <div className="text-right">
+                      {sale.payment_methods.map((pm, index) => (
+                        <div key={pm.id} className="text-gray-900">
+                          {pm.name}: ${pm.amount.toFixed(2)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>

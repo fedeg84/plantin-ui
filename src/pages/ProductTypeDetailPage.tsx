@@ -162,7 +162,8 @@ export default function ProductTypeDetailPage() {
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Atributos</h2>
             {productTypeAttributes && productTypeAttributes.length > 0 ? (
-              <div className="overflow-x-auto">
+              {/* Desktop Attributes Table - Hidden on mobile */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -183,6 +184,22 @@ export default function ProductTypeDetailPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              
+              {/* Mobile Attributes Cards - Hidden on desktop */}
+              <div className="md:hidden space-y-3">
+                {productTypeAttributes.map((attribute) => (
+                  <div key={attribute.id} className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-900">
+                        {attribute.name}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {attribute.attribute_type}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="text-center py-8">

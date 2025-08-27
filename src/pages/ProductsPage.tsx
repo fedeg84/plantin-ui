@@ -187,7 +187,8 @@ export default function ProductsPage() {
       />
 
       {/* Products List */}
-      <div className="bg-white shadow rounded-lg">
+      {/* Desktop Products Table - Hidden on mobile */}
+      <div className="hidden md:block bg-white shadow rounded-lg">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -340,6 +341,111 @@ export default function ProductsPage() {
               </tbody>
             </table>
           </div>
+        )}
+      </div>
+
+      {/* Mobile Products Cards - Hidden on desktop */}
+      <div className="md:hidden space-y-4">
+        {isLoading ? (
+          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-2">Cargando productos...</p>
+          </div>
+        ) : products?.items.length === 0 ? (
+          <div className="bg-white rounded-lg shadow p-4 text-center">
+            <Package className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Sin productos</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Comienza creando tu primer producto.
+            </p>
+          </div>
+        ) : (
+          products?.items.map((product) => (
+            <div 
+              key={product.id} 
+              className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleRowClick(product.id)}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-2">
+                    Código: {product.code}
+                  </p>
+                  <p className="text-lg font-semibold text-green-600 mb-2">
+                    ${product.current_price.toFixed(2)}
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingProduct(product.id);
+                      setShowEditForm(true);
+                      resetEdit({
+                        name: product.name,
+                        code: product.code,
+                        product_type_id: product.product_type.id,
+                        current_price: product.current_price,
+                        current_stock: product.current_stock,
+                        image_url: product.image_url || ''
+                      });
+                    }}
+                    className="p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded transition-colors duration-150"
+                    title="Editar"
+                  >
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(product.id, product.name, e)}
+                    className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-150"
+                    title="Eliminar"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Stock:</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {product.current_stock} unidades
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Tipo:</span>
+                  <span className="text-sm text-gray-900">
+                    {product.product_type.name}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Creado por:</span>
+                  <span className="text-sm text-gray-900">
+                    {product.created_by}
+                  </span>
+                </div>
+                
+                {product.attributes && product.attributes.length > 0 && (
+                  <div className="pt-2 border-t">
+                    <span className="text-sm text-gray-500 block mb-1">Atributos:</span>
+                    <div className="space-y-1">
+                      {product.attributes.map((attr) => (
+                        <div key={attr.id} className="flex justify-between text-sm">
+                          <span className="text-gray-600">{attr.product_type_attribute.name}:</span>
+                          <span className="text-gray-900">{attr.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
         )}
       </div>
 

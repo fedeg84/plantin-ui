@@ -60,7 +60,7 @@ const CreateUserPage: React.FC = () => {
       username: data.username,
       password: data.password,
       role: data.role,
-      picture_id: profileImageId, // Always include, even if null
+      picture_id: profileImageId || undefined, // Convert null to undefined
     };
     console.log('🔍 DEBUG - createData:', createData);
     createUserMutation.mutate(createData);

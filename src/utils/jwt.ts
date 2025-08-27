@@ -1,5 +1,5 @@
 interface JWTPayload {
-  sub: string;
+  user_id: string;
   username: string;
   role: string;
   exp: number;
@@ -30,10 +30,14 @@ export function extractUserFromToken(token: string) {
   
   // Handle different ID formats
   let userId: number;
-  if (typeof payload.sub === 'string') {
-    userId = parseInt(payload.sub) || 1; // Fallback to 1 if parsing fails
+  if (typeof payload.user_id === 'string') {
+    userId = parseInt(payload.user_id);
+    if (isNaN(userId)) {
+      console.error('Invalid user_id in JWT:', payload.user_id);
+      return null;
+    }
   } else {
-    userId = payload.sub || 1;
+    userId = payload.user_id;
   }
   
   // Handle role format - remove "Role." prefix if present

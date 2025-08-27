@@ -223,7 +223,7 @@ export default function ProductTypesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
-                          onClick={(e) => handleDelete(productType.id, productType.name, e)}
+                          onClick={(e) => handleDelete(productType.id, e)}
                           className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
                           title="Eliminar"
                         >

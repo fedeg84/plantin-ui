@@ -236,7 +236,7 @@ export default function ProductDetailPage() {
                   <div key={attributeValue.id} className="bg-gray-50 rounded-lg p-3">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-gray-900">
-                        {attributeValue.product_type_attribute.name}
+                        {attributeValue.name}
                       </span>
                       <span className="text-sm text-gray-600">
                         {attributeValue.value}

@@ -29,7 +29,8 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
       const imageUrl = fileApi.getImageUrl(currentImageId);
       setCurrentImageUrl(imageUrl);
       setPreviewUrl(null); // Clear preview if showing current image
-    } else if (!currentImageId) {
+    } else if (!currentImageId && !uploadedImageId) {
+      // Only reset if there's no uploaded image either
       setCurrentImageUrl(null);
       setUploadedImageId(null);
       // Ensure parent state is in sync

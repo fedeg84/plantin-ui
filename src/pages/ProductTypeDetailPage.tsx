@@ -162,45 +162,45 @@ export default function ProductTypeDetailPage() {
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Atributos</h2>
             {productTypeAttributes && productTypeAttributes.length > 0 ? (
-              {/* Desktop Attributes Table - Hidden on mobile */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nombre
-                      </th>
-
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {productTypeAttributes.map((attribute) => (
-                      <tr key={attribute.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{attribute.name}</div>
-                        </td>
-
+              <>
+                {/* Desktop Attributes Table - Hidden on mobile */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Nombre
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              
-              {/* Mobile Attributes Cards - Hidden on desktop */}
-              <div className="md:hidden space-y-3">
-                {productTypeAttributes.map((attribute) => (
-                  <div key={attribute.id} className="bg-gray-50 rounded-lg p-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-900">
-                        {attribute.name}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {attribute.attribute_type}
-                      </span>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {productTypeAttributes.map((attribute) => (
+                        <tr key={attribute.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{attribute.name}</div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {/* Mobile Attributes Cards - Hidden on desktop */}
+                <div className="md:hidden space-y-3">
+                  {productTypeAttributes.map((attribute) => (
+                    <div key={attribute.id} className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-gray-900">
+                          {attribute.name}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {attribute.attribute_type}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="text-center py-8">
                 <Tag className="h-12 w-12 text-gray-400 mx-auto mb-4" />

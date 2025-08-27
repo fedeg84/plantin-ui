@@ -41,10 +41,8 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const uploadMutation = useMutation({
     mutationFn: (file: File) => fileApi.upload(file),
     onSuccess: (response) => {
-      console.log('✅ Image uploaded successfully, ID:', response.id);
       setUploadedImageId(response.id);
       onImageChange(response.id);
-      console.log('✅ Called onImageChange with ID:', response.id);
       setCurrentImageUrl(null); // Clear current image when new one is uploaded
     },
     onError: (error: any) => {

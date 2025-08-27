@@ -25,7 +25,7 @@ export function decodeJWT(token: string): JWTPayload | null {
 
 export function extractUserFromToken(token: string) {
   const payload = decodeJWT(token);
-  console.log('JWT Payload:', payload); // Debug log
+
   if (!payload) return null;
   
   // Handle different ID formats
@@ -47,6 +47,6 @@ export function extractUserFromToken(token: string) {
     username: payload.username,
     role: userRole
   };
-  console.log('Extracted user:', user); // Debug log
+
   return user;
 }

@@ -23,11 +23,6 @@ const CreateUserPage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [profileImageId, setProfileImageId] = useState<number | null>(null);
-
-  // Debug: Log when profileImageId changes
-  React.useEffect(() => {
-    console.log('📝 CreateUserPage - profileImageId changed to:', profileImageId);
-  }, [profileImageId]);
   
   const {
     register,
@@ -54,7 +49,6 @@ const CreateUserPage: React.FC = () => {
   });
 
   const onSubmit = (data: CreateUserFormData) => {
-    console.log('🔍 DEBUG - profileImageId:', profileImageId);
     const createData: CreateUserRequest = {
       name: data.name,
       username: data.username,
@@ -62,7 +56,6 @@ const CreateUserPage: React.FC = () => {
       role: data.role,
       picture_id: profileImageId || undefined, // Convert null to undefined
     };
-    console.log('🔍 DEBUG - createData:', createData);
     createUserMutation.mutate(createData);
   };
 

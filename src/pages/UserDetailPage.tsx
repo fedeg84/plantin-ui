@@ -112,8 +112,9 @@ const UserDetailPage: React.FC = () => {
           </nav>
         </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+        <div className="md:flex md:items-center md:justify-between mb-6">
+          {/* Mobile Layout */}
+          <div className="md:hidden space-y-4">
             <Link
               to="/admin/users"
               className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
@@ -125,15 +126,41 @@ const UserDetailPage: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900">Detalles del Usuario</h1>
               <p className="text-gray-600 mt-1">Información completa del usuario</p>
             </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigate(`/admin/users/${user.id}/edit`)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Editar
+              </button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => navigate(`/admin/users/${user.id}/edit`)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              Editar
-            </button>
+          
+          {/* Desktop Layout */}
+          <div className="hidden md:flex md:items-center md:justify-between w-full">
+            <div className="flex items-center gap-4">
+              <Link
+                to="/admin/users"
+                className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Volver
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Detalles del Usuario</h1>
+                <p className="text-gray-600 mt-1">Información completa del usuario</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigate(`/admin/users/${user.id}/edit`)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Editar
+              </button>
+            </div>
           </div>
         </div>
 

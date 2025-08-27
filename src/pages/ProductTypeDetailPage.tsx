@@ -100,8 +100,9 @@ export default function ProductTypeDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="md:flex md:items-center md:justify-between">
+        {/* Mobile Layout */}
+        <div className="md:hidden space-y-4">
           <Link
             to="/product-types"
             className="inline-flex items-center text-gray-600 hover:text-gray-900"
@@ -113,22 +114,55 @@ export default function ProductTypeDetailPage() {
             <h1 className="text-2xl font-bold text-gray-900">{productType.name}</h1>
             <p className="text-gray-600">Detalles del tipo de producto</p>
           </div>
+          <div className="flex items-center space-x-3">
+            <Link
+              to={`/product-types/${productType.id}/edit`}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Eliminar
+            </button>
+          </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <Link
-            to={`/product-types/${productType.id}/edit`}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Editar
-          </Link>
-          <button
-            onClick={handleDelete}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Eliminar
-          </button>
+        
+        {/* Desktop Layout */}
+        <div className="hidden md:flex md:items-center md:justify-between w-full">
+          <div className="flex items-center space-x-4">
+            <Link
+              to="/product-types"
+              className="inline-flex items-center text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              Volver
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{productType.name}</h1>
+              <p className="text-gray-600">Detalles del tipo de producto</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Link
+              to={`/product-types/${productType.id}/edit`}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Eliminar
+            </button>
+          </div>
         </div>
       </div>
 

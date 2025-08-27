@@ -4,9 +4,7 @@ import toast from 'react-hot-toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://plantin-api.up.railway.app';
 
-// Debug: Log the API URL being used
-console.log('🔧 Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
-console.log('🔧 Final API_BASE_URL:', API_BASE_URL);
+
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -34,9 +32,7 @@ export const apiClient = axios.create({
         }
       });
       
-      const result = searchParams.toString();
-      console.log('🌐 Serialized Params:', result);
-      return result;
+      return searchParams.toString();
     }
   }
 });
@@ -48,10 +44,6 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
-    // Debug: Log the full URL being requested
-    const fullUrl = `${config.baseURL}${config.url}`;
-    console.log('🌐 Full Request URL:', fullUrl);
     
     return config;
   },

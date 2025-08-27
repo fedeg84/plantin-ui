@@ -32,11 +32,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   };
 
   useEffect(() => {
-    console.log('🖼️ UserAvatar pictureId:', pictureId, 'imageError:', imageError);
     if (pictureId && !imageError) {
       // Use direct URL instead of downloading blob
       const imageUrl = fileApi.getImageUrl(pictureId);
-      console.log('🖼️ Generated image URL:', imageUrl);
       setImageUrl(imageUrl);
       setImageError(false);
     } else {

@@ -23,6 +23,11 @@ const CreateUserPage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [profileImageId, setProfileImageId] = useState<number | null>(null);
+
+  // Debug: Log when profileImageId changes
+  React.useEffect(() => {
+    console.log('📝 CreateUserPage - profileImageId changed to:', profileImageId);
+  }, [profileImageId]);
   
   const {
     register,
@@ -55,7 +60,7 @@ const CreateUserPage: React.FC = () => {
       username: data.username,
       password: data.password,
       role: data.role,
-      ...(profileImageId && { picture_id: profileImageId }),
+      picture_id: profileImageId, // Always include, even if null
     };
     console.log('🔍 DEBUG - createData:', createData);
     createUserMutation.mutate(createData);

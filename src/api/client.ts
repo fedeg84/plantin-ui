@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://plantin-api.up.railway.app';
 
 // Debug: Log the API URL being used
 console.log('🔧 Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
@@ -48,6 +48,11 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Debug: Log the full URL being requested
+    const fullUrl = `${config.baseURL}${config.url}`;
+    console.log('🌐 Full Request URL:', fullUrl);
+    
     return config;
   },
   (error) => {

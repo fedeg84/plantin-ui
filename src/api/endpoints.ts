@@ -133,7 +133,11 @@ export const fileApi = {
       .then(res => URL.createObjectURL(res.data)),
 
   getImageUrl: (id: number): string => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+    if (!id || id === null || id === undefined) {
+      console.warn('⚠️ getImageUrl called with invalid id:', id);
+      return '';
+    }
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://plantin-api.up.railway.app';
     return `${API_BASE_URL}/files/${id}/view`;
   },
 

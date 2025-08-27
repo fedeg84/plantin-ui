@@ -132,6 +132,11 @@ export const fileApi = {
     apiClient.get(`/files/${id}/download`, { responseType: 'blob' })
       .then(res => URL.createObjectURL(res.data)),
 
+  getImageUrl: (id: number): string => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+    return `${API_BASE_URL}/files/${id}/view`;
+  },
+
   delete: (id: number): Promise<void> =>
     apiClient.delete(`/files/${id}`).then(res => res.data),
 }; 

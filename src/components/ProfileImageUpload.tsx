@@ -25,16 +25,10 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
       setUploadedImageId(currentImageId);
       // Ensure parent state is in sync
       onImageChange(currentImageId);
-      // Load the current image
-      fileApi.download(currentImageId)
-        .then(url => {
-          setCurrentImageUrl(url);
-          setPreviewUrl(null); // Clear preview if showing current image
-        })
-        .catch(error => {
-          console.error('Error loading current image:', error);
-          setCurrentImageUrl(null);
-        });
+      // Load the current image using direct URL
+      const imageUrl = fileApi.getImageUrl(currentImageId);
+      setCurrentImageUrl(imageUrl);
+      setPreviewUrl(null); // Clear preview if showing current image
     } else if (!currentImageId) {
       setCurrentImageUrl(null);
       setUploadedImageId(null);

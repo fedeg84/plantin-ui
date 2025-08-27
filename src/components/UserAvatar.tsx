@@ -33,16 +33,10 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
 
   useEffect(() => {
     if (pictureId && !imageError) {
-      fileApi.download(pictureId)
-        .then(url => {
-          setImageUrl(url);
-          setImageError(false);
-        })
-        .catch(error => {
-          console.error('Error loading user avatar:', error);
-          setImageError(true);
-          setImageUrl(null);
-        });
+      // Use direct URL instead of downloading blob
+      const imageUrl = fileApi.getImageUrl(pictureId);
+      setImageUrl(imageUrl);
+      setImageError(false);
     } else {
       setImageUrl(null);
     }

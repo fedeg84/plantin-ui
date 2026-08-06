@@ -8,6 +8,7 @@ import {
   UpdateProductTypeRequest,
 } from '../types/api';
 import toast from 'react-hot-toast';
+import { useConfirm } from '../hooks/useConfirm';
 import BackButton from '../components/BackButton';
 import { goBack } from '../utils/navigation';
 
@@ -15,6 +16,7 @@ export default function ProductTypeFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirm, ConfirmDialog } = useConfirm();
   const isEditing = !!id;
   const fallback = '/products/types';
 
@@ -103,9 +105,13 @@ export default function ProductTypeFormPage() {
   };
 
   const handleDelete = async () => {
-    if (!id || !confirm('¿Estás seguro de que quieres eliminar este tipo de producto?')) {
-      return;
-    }
+    if (!id) return;
+    const confirmed = await confirm({
+      title: 'Eliminar tipo de producto',
+      message: '¿Estás seguro de que quieres eliminar este tipo de producto?',
+      confirmLabel: 'Eliminar',
+    });
+    if (!confirmed) return;
 
     try {
       await productTypesApi.delete(parseInt(id));
@@ -217,6 +223,7 @@ export default function ProductTypeFormPage() {
           </div>
         </div>
       </form>
+      {ConfirmDialog}
     </div>
   );
 }

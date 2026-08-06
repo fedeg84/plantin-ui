@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { expenseApi } from '../api/endpoints';
 import { Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '../hooks/useConfirm';
 import BackButton from '../components/BackButton';
 import MoneyInput from '../components/MoneyInput';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
@@ -29,6 +30,7 @@ export default function EditExpensePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const expenseId = parseInt(id!);
 
   const {
@@ -96,8 +98,13 @@ export default function EditExpensePage() {
     },
   });
 
-  const handleDelete = () => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este pago? Esta acción no se puede deshacer.')) {
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: 'Eliminar pago',
+      message: '¿Estás seguro de que quieres eliminar este pago? Esta acción no se puede deshacer.',
+      confirmLabel: 'Eliminar',
+    });
+    if (confirmed) {
       deleteMutation.mutate();
     }
   };
@@ -236,6 +243,7 @@ export default function EditExpensePage() {
           </div>
         </form>
       </div>
+      {ConfirmDialog}
     </div>
   );
 }

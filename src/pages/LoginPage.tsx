@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import { authApi } from '../api/endpoints';
 import { useAuthStore } from '../store/authStore';
@@ -34,8 +35,12 @@ export default function LoginPage() {
       login(data.token);
       toast.success('¡Bienvenido!');
     },
-    onError: () => {
-      toast.error('Credenciales incorrectas');
+    onError: (error) => {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        toast.error('Credenciales incorrectas');
+        return;
+      }
+      toast.error('Error al iniciar sesión. Intenta nuevamente.');
     },
   });
 

@@ -11,6 +11,7 @@ import TimePickerSelect from '../components/TimePickerSelect';
 import { SearchableMultiSelect } from '../components/SearchableMultiSelect';
 import type { DayOfWeek, Shift } from '../types/api';
 import { getApiErrorMessage } from '../utils/apiErrors';
+import { useConfirm } from '../hooks/useConfirm';
 
 const DAY_NAMES: Record<DayOfWeek, string> = {
   monday: 'Lunes',
@@ -42,6 +43,7 @@ export default function ShiftsPage() {
   const [onlyThisWeekCreate, setOnlyThisWeekCreate] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   // Get users for filter and form
   const { data: users } = useQuery({
@@ -188,21 +190,30 @@ export default function ShiftsPage() {
     setShowEditForm(true);
   };
 
-  const handleDeleteShift = (id: number, usernames: string) => {
-    if (!confirm(`¿Estás seguro de que quieres eliminar este turno de ${usernames}?`)) {
-      return;
+  const handleDeleteShift = async (id: number, usernames: string) => {
+    const confirmed = await confirm({
+      title: 'Eliminar turno',
+      message: `¿Estás seguro de que quieres eliminar este turno de ${usernames}?`,
+      confirmLabel: 'Eliminar',
+    });
+    if (confirmed) {
+      deleteMutation.mutate({ id, restore: false });
     }
-    deleteMutation.mutate({ id, restore: false });
   };
 
-  const handleRestoreShift = (id: number, isReplacement: boolean) => {
+  const handleRestoreShift = async (id: number, isReplacement: boolean) => {
     const message = isReplacement
       ? '¿Restaurar el turno habitual? Se eliminará el cambio de esta semana.'
       : '¿Eliminar este turno? Solo aplicaba para esta semana.';
-    if (!confirm(message)) {
-      return;
+    const confirmed = await confirm({
+      title: isReplacement ? 'Restaurar turno' : 'Eliminar turno',
+      message,
+      confirmLabel: isReplacement ? 'Restaurar' : 'Eliminar',
+      variant: isReplacement ? 'primary' : 'danger',
+    });
+    if (confirmed) {
+      deleteMutation.mutate({ id, restore: isReplacement });
     }
-    deleteMutation.mutate({ id, restore: isReplacement });
   };
 
   const handleToggleUser = (userId: number) => {
@@ -519,6 +530,7 @@ export default function ShiftsPage() {
           </div>
         </div>
       )}
+      {ConfirmDialog}
     </div>
   );
 }

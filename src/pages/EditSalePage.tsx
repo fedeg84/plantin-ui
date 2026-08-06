@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { saleApi } from '../api/endpoints';
 import { ShoppingCart, Trash2, Calculator, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '../hooks/useConfirm';
 import BackButton from '../components/BackButton';
 import MoneyInput from '../components/MoneyInput';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
@@ -88,6 +89,7 @@ export default function EditSalePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const saleId = parseInt(id!);
   const [selectedProducts, setSelectedProducts] = useState<{[key: number]: Product}>({});
   const originalSaleItemsRef = useRef<Map<number, OriginalSaleItem>>(new Map());
@@ -130,8 +132,13 @@ export default function EditSalePage() {
     },
   });
 
-  const handleDelete = () => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta venta? Esta acción no se puede deshacer.')) {
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: 'Eliminar venta',
+      message: '¿Estás seguro de que quieres eliminar esta venta? Esta acción no se puede deshacer.',
+      confirmLabel: 'Eliminar',
+    });
+    if (confirmed) {
       deleteMutation.mutate();
     }
   };
@@ -819,6 +826,7 @@ export default function EditSalePage() {
             </div>
          </form>
        </div>
+       {ConfirmDialog}
      </div>
    );
  }

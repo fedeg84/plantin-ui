@@ -8,6 +8,8 @@ import { userApi } from '../api/endpoints';
 import { CreateUserRequest } from '../types/api';
 import { Save } from 'lucide-react';
 import BackButton from '../components/BackButton';
+import toast from 'react-hot-toast';
+import { getApiErrorMessage } from '../utils/apiErrors';
 import ProfileImageUpload from '../components/ProfileImageUpload';
 
 const createUserSchema = z.object({
@@ -42,9 +44,9 @@ const CreateUserPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       navigate('/admin/users');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error creating user:', error);
-      alert('Error al crear el usuario: ' + (error.response?.data?.detail || error.message));
+      toast.error(getApiErrorMessage(error, 'Error al crear el usuario'));
     },
   });
 

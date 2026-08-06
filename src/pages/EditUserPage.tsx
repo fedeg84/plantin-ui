@@ -9,6 +9,9 @@ import { UpdateUserRequest } from '../types/api';
 import { Save } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { getApiErrorMessage } from '../utils/apiErrors';
+import { useConfirm } from '../hooks/useConfirm';
 import ProfileImageUpload from '../components/ProfileImageUpload';
 
 const updateUserSchema = z.object({
@@ -23,6 +26,7 @@ type UpdateUserFormData = z.infer<typeof updateUserSchema>;
 const EditUserPage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const { id } = useParams<{ id: string }>();
   const userId = parseInt(id!);
   const [profileImageId, setProfileImageId] = useState<number | null>(null);
@@ -52,9 +56,9 @@ const EditUserPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['user', userId] });
       navigate('/admin/users');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error updating user:', error);
-      alert('Error al actualizar el usuario: ' + (error.response?.data?.detail || error.message));
+      toast.error(getApiErrorMessage(error, 'Error al actualizar el usuario'));
     },
   });
 
@@ -73,16 +77,21 @@ const EditUserPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['user', userId] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error updating user status:', error);
-      alert('Error al cambiar el estado del usuario: ' + (error.response?.data?.detail || error.message));
+      toast.error(getApiErrorMessage(error, 'Error al cambiar el estado del usuario'));
     },
   });
 
-  const handleToggleActive = () => {
+  const handleToggleActive = async () => {
     if (!user) return;
     const action = user.is_active ? 'desactivar' : 'activar';
-    if (window.confirm(`¿Estás seguro de que quieres ${action} este usuario?`)) {
+    const confirmed = await confirm({
+      title: `${action.charAt(0).toUpperCase()}${action.slice(1)} usuario`,
+      message: `¿Estás seguro de que quieres ${action} este usuario?`,
+      confirmLabel: action.charAt(0).toUpperCase() + action.slice(1),
+    });
+    if (confirmed) {
       toggleActiveMutation.mutate(!user.is_active);
     }
   };
@@ -314,6 +323,7 @@ const EditUserPage: React.FC = () => {
           </form>
         </div>
       </div>
+      {ConfirmDialog}
     </div>
   );
 };

@@ -13,6 +13,7 @@ import {
 import { productApi } from '../api/endpoints';
 import type { UpdateProductRequest } from '../types/api';
 import toast from 'react-hot-toast';
+import { useConfirm } from '../hooks/useConfirm';
 import BackButton from '../components/BackButton';
 import MoneyInput from '../components/MoneyInput';
 import { formatDateTimeLocal } from '../utils/datetime';
@@ -38,6 +39,7 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const productId = parseInt(id!, 10);
   const [attributeRows, setAttributeRows] = useState<ProductAttributeFormRow[]>([]);
   const [typeDisplayName, setTypeDisplayName] = useState<string>('');
@@ -128,12 +130,16 @@ export default function ProductDetailPage() {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!product) return;
-    if (!confirm(`¿Estás seguro de que querés eliminar el producto "${product.name}"?`)) {
-      return;
+    const confirmed = await confirm({
+      title: 'Eliminar producto',
+      message: `¿Estás seguro de que querés eliminar el producto "${product.name}"?`,
+      confirmLabel: 'Eliminar',
+    });
+    if (confirmed) {
+      deleteMutation.mutate();
     }
-    deleteMutation.mutate();
   };
 
   const onSubmit = (data: ProductForm) => {
@@ -353,6 +359,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </form>
+      {ConfirmDialog}
     </div>
   );
 }

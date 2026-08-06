@@ -56,12 +56,17 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    const requestUrl = error.config?.url ?? '';
+    const isLoginRequest = requestUrl.includes('/auth/login');
+
     if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
-      toast.error('Sesión expirada. Por favor, inicia sesión nuevamente.');
-    } else if (error.response?.status >= 500) {
+      if (!isLoginRequest && useAuthStore.getState().isAuthenticated) {
+        useAuthStore.getState().logout();
+        toast.error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+      }
+    } else if (error.response?.status >= 500 && !isLoginRequest) {
       toast.error('Error del servidor. Intenta nuevamente más tarde.');
-    } else if (error.response?.data?.message) {
+    } else if (error.response?.data?.message && !isLoginRequest) {
       toast.error(error.response.data.message);
     }
     return Promise.reject(error);

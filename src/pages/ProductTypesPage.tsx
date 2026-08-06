@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Plus, 
   Search, 
-  Edit,
-  Trash2, 
   Package,
   Tags,
   ChevronLeft,
@@ -13,9 +11,12 @@ import {
 import { productTypesApi } from '../api/productTypes';
 import { ProductType, FindProductTypesRequest } from '../types/api';
 import toast from 'react-hot-toast';
+import { navigateWithReturn } from '../utils/navigation';
+import { formatDateLocal } from '../utils/datetime';
 
 export default function ProductTypesPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,24 +63,8 @@ export default function ProductTypesPage() {
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
-  const handleDelete = async (id: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click when clicking delete button
-    if (!confirm(`¿Estás seguro de que quieres eliminar este tipo de producto?`)) {
-      return;
-    }
-
-    try {
-      await productTypesApi.delete(id);
-      toast.success('Tipo de producto eliminado correctamente');
-      loadProductTypes();
-    } catch (error) {
-      console.error('Error deleting product type:', error);
-      toast.error('Error al eliminar el tipo de producto');
-    }
-  };
-
-  const handleRowClick = (productTypeId: number) => {
-    navigate(`/product-types/${productTypeId}`);
+  const openProductType = (productTypeId: number) => {
+    navigate(`/product-types/${productTypeId}/edit`);
   };
 
   const handleSort = (field: string) => {
@@ -93,19 +78,15 @@ export default function ProductTypesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tipos de Producto</h1>
-          <p className="text-gray-600">Gestiona los tipos de producto y sus atributos</p>
-        </div>
-        <Link
-          to="/product-types/create"
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => navigateWithReturn(navigate, location, '/product-types/create')}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
         >
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Tipo
-        </Link>
+        </button>
       </div>
 
       {/* Filters */}
@@ -145,13 +126,14 @@ export default function ProductTypesPage() {
               {searchTerm ? 'No se encontraron tipos de producto con esa búsqueda.' : 'Comienza creando tu primer tipo de producto.'}
             </p>
             {!searchTerm && (
-              <Link
-                to="/product-types/create"
+              <button
+                type="button"
+                onClick={() => navigateWithReturn(navigate, location, '/product-types/create')}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Crear Primer Tipo
-              </Link>
+              </button>
             )}
           </div>
         ) : (
@@ -187,9 +169,6 @@ export default function ProductTypesPage() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Fecha
                     </th>
-                    <th scope="col" className="relative px-6 py-3">
-                      <span className="sr-only">Acciones</span>
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -197,7 +176,7 @@ export default function ProductTypesPage() {
                     <tr 
                       key={productType.id} 
                       className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                      onClick={() => handleRowClick(productType.id)}
+                      onClick={() => openProductType(productType.id)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{productType.name}</div>
@@ -218,17 +197,8 @@ export default function ProductTypesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {new Date(productType.created_at).toLocaleDateString()}
+                          {formatDateLocal(productType.created_at)}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={(e) => handleDelete(productType.id, e)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -326,10 +296,9 @@ export default function ProductTypesPage() {
             <div 
               key={productType.id} 
               className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => handleRowClick(productType.id)}
+              onClick={() => openProductType(productType.id)}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
+              <div className="flex-1">
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                     {productType.name}
                   </h3>
@@ -337,35 +306,8 @@ export default function ProductTypesPage() {
                     {productType.description}
                   </p>
                 </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/product-types/${productType.id}/edit`);
-                    }}
-                    className="p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded transition-colors duration-150"
-                    title="Editar"
-                  >
-                    <Edit className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={(e) => handleDelete(productType.id, e)}
-                    className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-150"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
               
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">Atributos:</span>
-                  <span className="text-sm font-medium text-gray-900">
-                    0
-                  </span>
-                </div>
-                
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Creado por:</span>
                   <span className="text-sm text-gray-900">
@@ -376,7 +318,7 @@ export default function ProductTypesPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Fecha de creación:</span>
                   <span className="text-sm text-gray-900">
-                    {new Date(productType.created_at).toLocaleDateString('es-ES')}
+                    {formatDateLocal(productType.created_at)}
                   </span>
                 </div>
                 

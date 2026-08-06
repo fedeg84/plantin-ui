@@ -1,56 +1,124 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, ShoppingCart, DollarSign, Users, Package, CreditCard } from 'lucide-react';
-import { saleApi } from '../api/endpoints';
+import { Plus, ShoppingCart, DollarSign } from 'lucide-react';
+import { saleApi, productApi, paymentMethodApi } from '../api/endpoints';
 import { Sale } from '../types/api';
+import SaleDateFilter from '../components/SaleDateFilter';
+import { FilterSortPanel } from '../components/FilterSortPanel';
+import { formatTimeLocal } from '../utils/datetime';
+import { saleTimeRange, toDateInputValue, isSaleDateRangeValid } from '../utils/saleDateRange';
+
+const PAGE_SIZE = 20;
 
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
-  const [today] = useState(new Date().toISOString().split('T')[0]);
+  const today = useMemo(() => toDateInputValue(), []);
 
-  // Fetch today's sales
-  const { data: salesData, isLoading } = useQuery({
-    queryKey: ['sales', 'today', today],
-    queryFn: () => saleApi.find({ 
-      size: 5,
-      sort_by: 'time',
-      sort_order: 'desc',
-      min_time: today + 'T00:00:00',
-      max_time: today + 'T23:59:59',
-    }),
+  const [selectRange, setSelectRange] = useState(false);
+  const [singleDate, setSingleDate] = useState(today);
+  const [dateFrom, setDateFrom] = useState(today);
+  const [dateTo, setDateTo] = useState(today);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const [filters, setFilters] = useState<Record<string, any>>({});
+
+  const { min_time, max_time } = saleTimeRange(selectRange, singleDate, dateFrom, dateTo);
+  const rangeValid = isSaleDateRangeValid(selectRange, dateFrom, dateTo);
+
+  const baseQueryParams = {
+    search,
+    sort_by: 'time' as const,
+    sort_order: 'desc' as const,
+    created_by_ids: filters.created_by_ids,
+    payment_method_ids: filters.payment_method_ids,
+    product_ids: filters.product_ids,
+    min_time,
+    max_time,
+    min_total_price: filters.min_total_price,
+    max_total_price: filters.max_total_price,
+  };
+
+  const { data: products } = useQuery({
+    queryKey: ['products-filter'],
+    queryFn: () => productApi.find({ size: 100, is_active: true }),
   });
 
-  const todaySales = salesData?.items || [];
-  const totalRevenue = todaySales.reduce((sum, sale) => sum + (sale.total_price || 0), 0);
+  const { data: paymentMethods } = useQuery({
+    queryKey: ['payment-methods-filter'],
+    queryFn: () => paymentMethodApi.find({ size: 50, is_active: true }),
+  });
+
+  const { data: allSalesData, isLoading: isLoadingStats } = useQuery({
+    queryKey: ['sales', 'admin-history-stats', baseQueryParams],
+    queryFn: () =>
+      saleApi.find({
+        ...baseQueryParams,
+        size: 1000,
+        page: 0,
+      }),
+    enabled: rangeValid,
+  });
+
+  const { data: salesData, isLoading: isLoadingList } = useQuery({
+    queryKey: ['sales', 'admin-history-list', { ...baseQueryParams, page }],
+    queryFn: () =>
+      saleApi.find({
+        ...baseQueryParams,
+        size: PAGE_SIZE,
+        page,
+      }),
+    enabled: rangeValid,
+  });
+
+  const sales = salesData?.items || [];
+  const allSales = allSalesData?.items || [];
+  const totalRevenue = allSales.reduce((sum, sale) => sum + (sale.total_price || 0), 0);
+  const totalSalesCount = allSales.length;
+  const totalPages = salesData?.pagination.total_pages ?? 1;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: 'ARS'
+      currency: 'ARS',
     }).format(amount);
   };
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('es-AR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const formatTime = (dateString: string) => formatTimeLocal(dateString);
+
+  const openSale = (saleId: number) => navigate(`/sales/${saleId}/edit`);
+
+  const handleFiltersChange = (next: Record<string, any>) => {
+    setFilters(next);
+    setPage(0);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(0);
+  };
+
+  const resetPage = () => setPage(0);
+
+  const handleSelectRangeChange = (value: boolean) => {
+    if (value) {
+      setDateFrom(singleDate);
+      setDateTo((current) => (current < singleDate ? singleDate : current));
+    } else {
+      setSingleDate(dateFrom);
+    }
+    setSelectRange(value);
+    setPage(0);
   };
 
   return (
     <div className="space-y-6">
-      {/* Header with greeting and new sale button */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Panel de Administración
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Resumen de ventas y estadísticas del día
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">Historial de ventas</h1>
+          <p className="text-gray-600 mt-1">Consultá ventas por fecha, producto o vendedor</p>
         </div>
-        
+
         <button
           onClick={() => navigate('/sales/create')}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
@@ -60,165 +128,209 @@ export default function AdminDashboardPage() {
         </button>
       </div>
 
-      {/* Today's summary */}
+      <SaleDateFilter
+        selectRange={selectRange}
+        onSelectRangeChange={handleSelectRangeChange}
+        singleDate={singleDate}
+        onSingleDateChange={(value) => {
+          setSingleDate(value);
+          resetPage();
+        }}
+        dateFrom={dateFrom}
+        onDateFromChange={(value) => {
+          setDateFrom(value);
+          resetPage();
+        }}
+        dateTo={dateTo}
+        onDateToChange={(value) => {
+          setDateTo(value);
+          resetPage();
+        }}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Total Revenue Card */}
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <DollarSign className="h-8 w-8 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">
-                Recaudación del Día
-              </p>
+              <p className="text-sm font-medium text-gray-500">Recaudación</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {formatCurrency(totalRevenue)}
+                {!rangeValid ? '—' : isLoadingStats ? '...' : formatCurrency(totalRevenue)}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Sales Count Card */}
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <ShoppingCart className="h-8 w-8 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">
-                Ventas del Día
-              </p>
+              <p className="text-sm font-medium text-gray-500">Ventas realizadas</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {todaySales.length}
+                {!rangeValid ? '—' : isLoadingStats ? '...' : totalSalesCount}
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Sales */}
+      <FilterSortPanel
+        searchValue={search}
+        onSearchChange={handleSearchChange}
+        searchPlaceholder="Buscar ventas por producto, vendedor..."
+        filterFields={[
+          {
+            key: 'payment_method_ids',
+            label: 'Método de Pago',
+            type: 'multiselect',
+            placeholder: 'Buscar métodos de pago...',
+            options:
+              paymentMethods?.items.map((pm) => ({
+                value: pm.id,
+                label: pm.name,
+              })) || [],
+          },
+          {
+            key: 'product_ids',
+            label: 'Productos',
+            type: 'multiselect',
+            placeholder: 'Buscar productos...',
+            options:
+              products?.items.map((product) => ({
+                value: product.id,
+                label: product.name,
+              })) || [],
+          },
+          {
+            key: 'min_total_price',
+            label: 'Precio mínimo',
+            type: 'money',
+            placeholder: '0.00',
+            min: 0,
+          },
+          {
+            key: 'max_total_price',
+            label: 'Precio máximo',
+            type: 'money',
+            placeholder: '9999.99',
+            min: 0,
+          },
+        ]}
+        currentFilters={filters}
+        onFiltersChange={handleFiltersChange}
+      />
+
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">
-            Últimas Ventas del Día
-          </h2>
+          <h2 className="text-lg font-medium text-gray-900">Ventas</h2>
         </div>
-        
+
         <div className="divide-y divide-gray-200">
-          {isLoading ? (
+          {!rangeValid ? (
+            <div className="px-6 py-8 text-center text-gray-500">
+              <p className="text-sm text-red-600">
+                Corregí el rango de fechas para ver las ventas
+              </p>
+            </div>
+          ) : isLoadingList ? (
             <div className="px-6 py-4 text-center text-gray-500">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto mb-2"></div>
               Cargando ventas...
             </div>
-          ) : todaySales.length === 0 ? (
+          ) : sales.length === 0 ? (
             <div className="px-6 py-8 text-center text-gray-500">
               <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-lg font-medium">No hay ventas hoy</p>
-              <p className="text-sm">Comienza creando tu primera venta del día</p>
+              <p className="text-lg font-medium">No hay ventas</p>
+              <p className="text-sm">Probá cambiar la fecha o los filtros</p>
             </div>
           ) : (
-            todaySales.map((sale: Sale) => (
-              <div key={sale.id} className="px-6 py-4 hover:bg-gray-50 cursor-pointer" onClick={() => navigate(`/sales/${sale.id}`)}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0">
-                      <div className="h-8 w-8 bg-primary-100 rounded-full flex items-center justify-center">
-                        <ShoppingCart className="h-4 w-4 text-primary-600" />
+            sales.map((sale: Sale) => {
+              const maxVisibleProducts = 4;
+              const visibleItems = sale.items?.slice(0, maxVisibleProducts) || [];
+              const hasMoreProducts = sale.items && sale.items.length > maxVisibleProducts;
+
+              return (
+                <div
+                  key={sale.id}
+                  className="px-6 py-4 hover:bg-gray-50 cursor-pointer"
+                  onClick={() => openSale(sale.id)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-3 flex-1 min-w-0">
+                      <div className="flex-shrink-0">
+                        <div className="h-8 w-8 bg-primary-100 rounded-full flex items-center justify-center">
+                          <ShoppingCart className="h-4 w-4 text-primary-600" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {visibleItems.length > 0 ? (
+                          <div className="space-y-1">
+                            {visibleItems.map((item, index) => (
+                              <p key={index} className="text-sm text-gray-900 truncate">
+                                {item.product.name}{' '}
+                                {item.quantity > 1 && (
+                                  <span className="text-gray-500">x{item.quantity}</span>
+                                )}
+                              </p>
+                            ))}
+                            {hasMoreProducts && (
+                              <p className="text-xs text-gray-400 italic">
+                                +{sale.items!.length - maxVisibleProducts} producto
+                                {sale.items!.length - maxVisibleProducts > 1 ? 's' : ''} más
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500 italic">Sin productos</p>
+                        )}
+                        <p className="text-xs text-gray-400 mt-1">
+                          {formatTime(sale.time)}
+                          {sale.created_by_username ? ` · ${sale.created_by_username}` : ''}
+                        </p>
                       </div>
                     </div>
-                    <div>
+                    <div className="text-right flex-shrink-0 ml-4">
                       <p className="text-sm font-medium text-gray-900">
-                        Venta #{sale.id}
+                        {formatCurrency(sale.total_price || 0)}
                       </p>
-                      <p className="text-sm text-gray-500">
-                        {formatTime(sale.time)}
+                      <p className="text-xs text-gray-500">
+                        {sale.payment_methods?.[0]?.payment_method_name || 'Sin método'}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
-                      {formatCurrency(sale.total_price || 0)}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {sale.payment_methods?.[0]?.payment_method_name || 'Sin método de pago'}
-                    </p>
-                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
-      </div>
 
-      {/* Admin Management Section */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">
-            Gestión del Sistema
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Administra usuarios, productos y configuraciones del sistema
-          </p>
-        </div>
-        
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Users Management */}
-            <div 
-              className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 cursor-pointer transition-colors"
-              onClick={() => navigate('/admin/users')}
+        {totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="btn-secondary disabled:opacity-50"
             >
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Users className="h-5 w-5 text-blue-600" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Gestión de Usuarios</h3>
-                  <p className="text-xs text-gray-500">Administrar usuarios del sistema</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Products Management */}
-            <div 
-              className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 cursor-pointer transition-colors"
-              onClick={() => navigate('/products')}
+              Anterior
+            </button>
+            <span className="text-sm text-gray-600">
+              Página {page + 1} de {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className="btn-secondary disabled:opacity-50"
             >
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Package className="h-5 w-5 text-green-600" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Gestión de Productos</h3>
-                  <p className="text-xs text-gray-500">Administrar productos y tipos</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment Methods Management */}
-            <div 
-              className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 cursor-pointer transition-colors"
-              onClick={() => navigate('/payment-methods')}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-purple-600" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900">Métodos de Pago</h3>
-                  <p className="text-xs text-gray-500">Configurar métodos de pago</p>
-                </div>
-              </div>
-            </div>
+              Siguiente
+            </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

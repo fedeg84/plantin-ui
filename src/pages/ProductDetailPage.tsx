@@ -1,73 +1,164 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Trash2, 
+import { useParams, useNavigate } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  Trash2,
   Package,
   User,
   Calendar,
-  Tag,
-  DollarSign,
-  Box
 } from 'lucide-react';
 import { productApi } from '../api/endpoints';
-import { Product } from '../types/api';
+import type { UpdateProductRequest } from '../types/api';
 import toast from 'react-hot-toast';
+import BackButton from '../components/BackButton';
+import MoneyInput from '../components/MoneyInput';
+import { formatDateLocal, formatDateTimeLocal } from '../utils/datetime';
+import ProductTypeSelector from '../components/ProductTypeSelector';
+import ProductAttributesEditor, {
+  ProductAttributeFormRow,
+  toProductAttributesPayload,
+} from '../components/ProductAttributesEditor';
+
+const productSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido'),
+  description: z.string().optional(),
+  code: z.string().optional(),
+  type_id: z.number().optional(),
+  current_price: z.number().min(0, 'El precio debe ser mayor o igual a 0').optional(),
+  current_stock: z.number().min(0, 'El stock debe ser mayor o igual a 0').optional(),
+  is_active: z.boolean().optional(),
+});
+
+type ProductForm = z.infer<typeof productSchema>;
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const productId = parseInt(id!, 10);
+  const [attributeRows, setAttributeRows] = useState<ProductAttributeFormRow[]>([]);
+  const [typeDisplayName, setTypeDisplayName] = useState<string>('');
+  const [originalStock, setOriginalStock] = useState<number | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<ProductForm>({
+    resolver: zodResolver(productSchema),
+  });
+
+  const productName = watch('name');
+
+  const { data: product, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productApi.getById(productId),
+    enabled: !!id,
+  });
+
+  const updateProductMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateProductRequest }) =>
+      productApi.update(id, data),
+    onSuccess: () => {
+      toast.success('Producto actualizado correctamente');
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product', id] });
+    },
+    onError: () => {
+      toast.error('Error al actualizar el producto');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => productApi.delete(productId),
+    onSuccess: () => {
+      toast.success('Producto eliminado correctamente');
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      navigate('/products');
+    },
+    onError: () => {
+      toast.error('Error al eliminar el producto');
+    },
+  });
 
   useEffect(() => {
-    if (id) {
-      loadProduct(parseInt(id));
-    }
-  }, [id]);
-
-    const loadProduct = async (productId: number) => {
-    try {
-      setLoading(true);
-      const data = await productApi.getById(productId);
-      console.log('Product data loaded:', data);
-      console.log('Product attributes:', data.attributes);
-      setProduct(data);
-    } catch (error) {
-      console.error('Error loading product:', error);
-      toast.error('Error al cargar el producto');
-      navigate('/products');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-
-  const handleDelete = async () => {
     if (!product) return;
 
-    if (!confirm(`¿Estás seguro de que quieres eliminar el producto "${product.name}"?`)) {
-      return;
+    setValue('name', product.name);
+    setValue('description', product.description || '');
+    setValue('code', product.code || '');
+    setValue('current_price', product.current_price);
+    setValue('current_stock', product.current_stock);
+    setValue('is_active', product.is_active);
+    setOriginalStock(product.current_stock);
+
+    if (product.type_id) {
+      setValue('type_id', product.type_id);
+      setTypeDisplayName(product.type_name ?? '');
+    } else {
+      setValue('type_id', undefined);
+      setTypeDisplayName('');
     }
 
-    try {
-      await productApi.delete(product.id);
-      toast.success('Producto eliminado correctamente');
-      navigate('/products');
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      toast.error('Error al eliminar el producto');
+    setAttributeRows(
+      (product.attributes ?? []).map((attr) => ({
+        key: String(attr.id ?? crypto.randomUUID()),
+        attribute_type_id: attr.attribute_type_id,
+        attribute_type_name: attr.attribute_type_name,
+        value: attr.value ?? '',
+      }))
+    );
+  }, [product, setValue]);
+
+  const handleTypeChange = (typeId: number, productType?: { name: string }) => {
+    if (typeId > 0) {
+      setValue('type_id', typeId);
+      setTypeDisplayName(productType?.name ?? '');
+    } else {
+      setValue('type_id', undefined);
+      setTypeDisplayName('');
     }
   };
 
-  if (loading) {
+  const handleDelete = () => {
+    if (!product) return;
+    if (!confirm(`¿Estás seguro de que querés eliminar el producto "${product.name}"?`)) {
+      return;
+    }
+    deleteMutation.mutate();
+  };
+
+  const onSubmit = (data: ProductForm) => {
+    const attributes = toProductAttributesPayload(attributeRows);
+    const requestData: UpdateProductRequest = {
+      name: data.name,
+      description: data.description,
+      code: data.code ?? '',
+      current_price: data.current_price ?? 0,
+      current_stock: data.current_stock ?? 0,
+      is_active: data.is_active ?? true,
+      attributes,
+    };
+
+    if (data.type_id) {
+      requestData.type_id = data.type_id;
+    }
+
+    updateProductMutation.mutate({ id: productId, data: requestData });
+  };
+
+  if (isLoadingProduct) {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          <p className="text-gray-600">Cargando producto...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+          <p className="text-gray-600">Cargando producto…</p>
         </div>
       </div>
     );
@@ -79,215 +170,159 @@ export default function ProductDetailPage() {
         <div className="text-center">
           <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Producto no encontrado</h3>
-          <p className="text-gray-600 mb-4">El producto que buscas no existe o ha sido eliminado.</p>
-          <Link
-            to="/products"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver a la lista
-          </Link>
+          <p className="text-gray-600 mb-4">El producto que buscás no existe o fue eliminado.</p>
+          <BackButton
+            fallback="/products"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 min-h-0 hover:text-white"
+          />
         </div>
       </div>
     );
   }
 
+  const currentStock = watch('current_stock');
+
+  const stockChangeHint =
+    originalStock !== null &&
+    currentStock !== undefined &&
+    !Number.isNaN(currentStock) &&
+    currentStock !== originalStock
+      ? (() => {
+          const delta = Math.abs(currentStock - originalStock);
+          const verb = currentStock > originalStock ? 'sumarán' : 'restarán';
+          return `Actualmente hay ${originalStock} productos en stock. Se ${verb} ${delta} productos.`;
+        })()
+      : null;
+
+  const saving = isSubmitting || updateProductMutation.isPending;
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="md:flex md:items-center md:justify-between">
-        {/* Mobile Layout */}
-        <div className="md:hidden space-y-4">
-          <Link
-            to="/products"
-            className="inline-flex items-center text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Volver
-          </Link>
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0 flex-1 space-y-3">
+          <BackButton fallback="/products" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
-            <p className="text-gray-600">Detalles del producto</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Link
-              to={`/products/${product.id}/edit`}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Eliminar
-            </button>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
+              {productName || product.name}
+            </h1>
+            <p className="text-gray-600">Editá los datos del producto</p>
           </div>
         </div>
-        
-        {/* Desktop Layout */}
-        <div className="hidden md:flex md:items-center md:justify-between w-full">
-          <div className="flex items-center space-x-4">
-            <Link
-              to="/products"
-              className="inline-flex items-center text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              Volver
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
-              <p className="text-gray-600">Detalles del producto</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Link
-              to={`/products/${product.id}/edit`}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
-            </Link>
-            <button
-              onClick={handleDelete}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Eliminar
-            </button>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={deleteMutation.isPending}
+          className="inline-flex min-h-[44px] justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+        >
+          <Trash2 className="h-4 w-4 mr-2 shrink-0" aria-hidden />
+          Eliminar
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Information */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Basic Information */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Información Básica</h2>
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Nombre</dt>
-                <dd className="mt-1 text-sm text-gray-900">{product.name}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Tipo de Producto</dt>
-                <dd className="mt-1 text-sm text-gray-900">{product.type_name}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Código</dt>
-                <dd className="mt-1 text-sm text-gray-900">{product.code || 'Sin código'}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Estado</dt>
-                <dd className="mt-1 text-sm text-gray-900">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    product.is_active 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {product.is_active ? 'Activo' : 'Inactivo'}
-                  </span>
-                </dd>
-              </div>
-              <div className="sm:col-span-2">
-                <dt className="text-sm font-medium text-gray-500">Descripción</dt>
-                <dd className="mt-1 text-sm text-gray-900">
-                  {product.description || 'Sin descripción'}
-                </dd>
-              </div>
-            </dl>
-          </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6 space-y-4">
+            <h2 className="text-lg font-medium text-gray-900">Información del producto</h2>
 
-          {/* Pricing and Stock */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Precio y Stock</h2>
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-              <div>
-                <dt className="text-sm font-medium text-gray-500 flex items-center">
-                  <DollarSign className="h-4 w-4 mr-1" />
-                  Precio Actual
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900">${product.current_price.toFixed(2)}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-gray-500 flex items-center">
-                  <Box className="h-4 w-4 mr-1" />
-                  Stock Actual
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900">{product.current_stock}</dd>
-              </div>
-            </dl>
-          </div>
+            <div>
+              <label className="label">Nombre *</label>
+              <input {...register('name')} type="text" className="input text-base" />
+              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+            </div>
 
-                     {/* Attributes */}
-           {(() => {
-             console.log('Rendering attributes section');
-             console.log('product.attributes:', product.attributes);
-             console.log('product.attributes?.length:', product.attributes?.length);
-             return product.attributes && product.attributes.length > 0;
-           })() && (
-             <div className="bg-white shadow rounded-lg p-6">
-               <h2 className="text-lg font-medium text-gray-900 mb-4">Atributos</h2>
-              {/* Desktop Attributes Table - Hidden on mobile */}
-              <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Atributo
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Valor
-                      </th>
-                    </tr>
-                  </thead>
-                                     <tbody className="bg-white divide-y divide-gray-200">
-                     {product.attributes?.map((attributeValue) => {
-                       console.log('Rendering attributeValue:', attributeValue);
-                       return (
-                         <tr key={attributeValue.id}>
-                           <td className="px-6 py-4 whitespace-nowrap">
-                             <div className="text-sm font-medium text-gray-900">
-                               {attributeValue.name}
-                             </div>
-                           </td>
-                           <td className="px-6 py-4 whitespace-nowrap">
-                             <div className="text-sm text-gray-900">{attributeValue.value || '-'}</div>
-                           </td>
-                         </tr>
-                       );
-                     })}
-                   </tbody>
-                </table>
+            <div>
+              <label className="label">Descripción</label>
+              <textarea {...register('description')} rows={3} className="input text-base" />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Código</label>
+                <input {...register('code')} type="text" className="input text-base" />
               </div>
-              
-              {/* Mobile Attributes Cards - Hidden on desktop */}
-              <div className="md:hidden space-y-3">
-                {product.attributes?.map((attributeValue) => (
-                  <div key={attributeValue.id} className="bg-gray-50 rounded-lg p-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-900">
-                        {attributeValue.name}
-                      </span>
-                      <span className="text-sm text-gray-600">
-                        {attributeValue.value}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+              <div>
+                <label className="label">Estado</label>
+                <Controller
+                  name="is_active"
+                  control={control}
+                  render={({ field }) => (
+                    <select
+                      {...field}
+                      value={field.value ? 1 : 0}
+                      onChange={(e) => field.onChange(e.target.value === '1')}
+                      className="input text-base"
+                    >
+                      <option value={1}>Activo</option>
+                      <option value={0}>Inactivo</option>
+                    </select>
+                  )}
+                />
               </div>
             </div>
-          )}
+          </div>
+
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6 space-y-4">
+            <h2 className="text-lg font-medium text-gray-900">Precio y stock</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Precio de venta</label>
+                <MoneyInput
+                  {...register('current_price', { valueAsNumber: true })}
+                  className="text-base"
+                />
+                {errors.current_price && (
+                  <p className="mt-1 text-sm text-red-600">{errors.current_price.message}</p>
+                )}
+              </div>
+              <div>
+                <label className="label">Stock</label>
+                <input
+                  {...register('current_stock', { valueAsNumber: true })}
+                  type="number"
+                  min={0}
+                  className="input text-base"
+                />
+                {stockChangeHint && (
+                  <p className="mt-1 text-sm text-gray-600">{stockChangeHint}</p>
+                )}
+                {errors.current_stock && (
+                  <p className="mt-1 text-sm text-red-600">{errors.current_stock.message}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6 space-y-4">
+            <h2 className="text-lg font-medium text-gray-900">Tipo de producto</h2>
+            <div>
+              <label className="label">Tipo</label>
+              <ProductTypeSelector
+                value={watch('type_id') || 0}
+                displayName={typeDisplayName}
+                allowNone
+                showCreateOption
+                onChange={handleTypeChange}
+                placeholder="Ej.: maceta, planta…"
+              />
+            </div>
+          </div>
+
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            <ProductAttributesEditor value={attributeRows} onChange={setAttributeRows} />
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full min-h-[48px] inline-flex justify-center items-center px-4 py-3 text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50"
+          >
+            {saving ? 'Guardando…' : 'Guardar cambios'}
+          </button>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Metadata */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Información del Sistema</h2>
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Información del sistema</h2>
             <dl className="space-y-4">
               <div>
                 <dt className="text-sm font-medium text-gray-500">ID</dt>
@@ -304,40 +339,19 @@ export default function ProductDetailPage() {
                 <dt className="text-sm font-medium text-gray-500">Fecha de creación</dt>
                 <dd className="mt-1 text-sm text-gray-900 flex items-center">
                   <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                  {new Date(product.created_at).toLocaleDateString('es-ES', {
+                  {formatDateTimeLocal(product.created_at, {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
                   })}
                 </dd>
               </div>
             </dl>
           </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Acciones Rápidas</h2>
-            <div className="space-y-3">
-              <Link
-                to={`/products/${product.id}/edit`}
-                className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Editar Producto
-              </Link>
-              <Link
-                to={`/product-types/${product.type_id}`}
-                className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700"
-              >
-                <Tag className="h-4 w-4 mr-2" />
-                Ver Tipo de Producto
-              </Link>
-            </div>
-          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
-} 
+}

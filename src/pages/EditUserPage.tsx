@@ -6,7 +6,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { userApi } from '../api/endpoints';
 import { UpdateUserRequest } from '../types/api';
-import { ArrowLeft, Save } from 'lucide-react';
+import { Save, Trash2 } from 'lucide-react';
+import BackButton from '../components/BackButton';
 import { Link } from 'react-router-dom';
 import ProfileImageUpload from '../components/ProfileImageUpload';
 
@@ -15,7 +16,6 @@ const updateUserSchema = z.object({
   username: z.string().min(3, 'El nombre de usuario debe tener al menos 3 caracteres'),
   password: z.string().optional(),
   role: z.enum(['ADMIN', 'USER']),
-  is_active: z.boolean(),
 });
 
 type UpdateUserFormData = z.infer<typeof updateUserSchema>;
@@ -30,6 +30,7 @@ const EditUserPage: React.FC = () => {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors, isSubmitting },
     setValue,
   } = useForm<UpdateUserFormData>({
@@ -57,12 +58,54 @@ const EditUserPage: React.FC = () => {
     },
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: () => userApi.delete(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      navigate('/admin/users');
+    },
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: (isActive: boolean) => {
+      const data = getValues();
+      return userApi.update(userId, {
+        name: data.name,
+        username: data.username,
+        role: data.role,
+        is_active: isActive,
+        picture_id: profileImageId || undefined,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['user', userId] });
+    },
+    onError: (error: any) => {
+      console.error('Error updating user status:', error);
+      alert('Error al cambiar el estado del usuario: ' + (error.response?.data?.detail || error.message));
+    },
+  });
+
+  const handleDelete = () => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+      deleteUserMutation.mutate();
+    }
+  };
+
+  const handleToggleActive = () => {
+    if (!user) return;
+    const action = user.is_active ? 'desactivar' : 'activar';
+    if (window.confirm(`¿Estás seguro de que quieres ${action} este usuario?`)) {
+      toggleActiveMutation.mutate(!user.is_active);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       setValue('name', user.name);
       setValue('username', user.username);
       setValue('role', user.role);
-      setValue('is_active', user.is_active);
       setProfileImageId(user.picture_id || null);
     }
   }, [user, setValue]);
@@ -73,7 +116,7 @@ const EditUserPage: React.FC = () => {
       name: data.name,
       username: data.username,
       role: data.role,
-      is_active: data.is_active,
+      is_active: user?.is_active,
       picture_id: profileImageId || undefined,
     };
     
@@ -152,13 +195,7 @@ const EditUserPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4 mb-6">
-          <Link
-            to="/admin/users"
-            className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver
-          </Link>
+          <BackButton fallback="/admin/users" className="min-h-0" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Editar Usuario</h1>
             <p className="text-gray-600 mt-1">Modifica la información del usuario</p>
@@ -254,40 +291,53 @@ const EditUserPage: React.FC = () => {
               )}
             </div>
 
-            {/* Active Status Field */}
-            <div>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  {...register('is_active')}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                />
-                <span className="ml-2 text-sm text-gray-700">Usuario Activo</span>
-              </label>
-              {errors.is_active && (
-                <p className="mt-1 text-sm text-red-600">{errors.is_active.message}</p>
-              )}
-            </div>
-
-
-
-            {/* Form Actions */}
-            <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+            <div className="pt-2">
               <button
                 type="button"
-                onClick={() => navigate('/admin/users')}
-                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                onClick={handleToggleActive}
+                disabled={toggleActiveMutation.isPending || updateUserMutation.isPending || deleteUserMutation.isPending}
+                className={`inline-flex items-center px-4 py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+                  user.is_active
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-green-600 hover:bg-green-700'
+                }`}
               >
-                Cancelar
+                {toggleActiveMutation.isPending
+                  ? 'Guardando...'
+                  : user.is_active
+                    ? 'Desactivar usuario'
+                    : 'Activar usuario'}
               </button>
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex items-center justify-between pt-6 border-t border-gray-200">
               <button
-                type="submit"
-                disabled={isSubmitting || updateUserMutation.isPending}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+                onClick={handleDelete}
+                disabled={deleteUserMutation.isPending || updateUserMutation.isPending || toggleActiveMutation.isPending}
+                className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Save className="w-4 h-4" />
-                {isSubmitting || updateUserMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
+                <Trash2 className="w-4 h-4 mr-2" />
+                {deleteUserMutation.isPending ? 'Eliminando...' : 'Eliminar usuario'}
               </button>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => navigate('/admin/users')}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || updateUserMutation.isPending || deleteUserMutation.isPending || toggleActiveMutation.isPending}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4" />
+                  {isSubmitting || updateUserMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
             </div>
           </form>
         </div>

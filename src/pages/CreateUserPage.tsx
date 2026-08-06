@@ -3,11 +3,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { userApi } from '../api/endpoints';
 import { CreateUserRequest } from '../types/api';
-import { ArrowLeft, Save } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Save } from 'lucide-react';
+import BackButton from '../components/BackButton';
 import ProfileImageUpload from '../components/ProfileImageUpload';
 
 const createUserSchema = z.object({
@@ -95,13 +95,7 @@ const CreateUserPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4 mb-6">
-          <Link
-            to="/admin/users"
-            className="text-gray-600 hover:text-gray-900 flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver
-          </Link>
+          <BackButton fallback="/admin/users" className="min-h-0" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Crear Nuevo Usuario</h1>
             <p className="text-gray-600 mt-1">Agrega un nuevo usuario al sistema</p>

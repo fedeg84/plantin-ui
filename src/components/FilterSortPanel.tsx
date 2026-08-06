@@ -3,17 +3,19 @@ import { Filter, X } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { SearchableMultiSelect } from './SearchableMultiSelect';
 import { DateRangePicker } from './DateRangePicker';
+import MoneyInput from './MoneyInput';
 
 export interface FilterField {
   key: string;
   label: string;
-  type: 'select' | 'multiselect' | 'date' | 'daterange' | 'number' | 'text' | 'boolean';
+  type: 'select' | 'multiselect' | 'date' | 'daterange' | 'number' | 'money' | 'text' | 'boolean';
   options?: Array<{ value: any; label: string }>;
   placeholder?: string;
   min?: number;
   max?: number;
   startDateKey?: string; // Para daterange
   endDateKey?: string;   // Para daterange
+  dateOnly?: boolean;    // Para daterange, si es true usa solo fecha sin hora
 }
 
 interface FilterSortPanelProps {
@@ -133,6 +135,21 @@ export const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                   />
                 )}
 
+                {field.type === 'money' && (
+                  <MoneyInput
+                    placeholder={field.placeholder}
+                    value={currentFilters[field.key] ?? ''}
+                    onChange={(e) => {
+                      const newValue = e.target.value ? parseFloat(e.target.value.replace(',', '.')) : undefined;
+                      onFiltersChange({
+                        ...currentFilters,
+                        [field.key]: newValue,
+                      });
+                    }}
+                    className="text-sm"
+                  />
+                )}
+
                 {field.type === 'number' && (
                   <input
                     type="number"
@@ -213,6 +230,7 @@ export const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
                       onFiltersChange(newFilters);
                     }}
                     placeholder={field.placeholder || "Seleccionar rango de fechas"}
+                    dateOnly={field.dateOnly}
                   />
                 )}
 

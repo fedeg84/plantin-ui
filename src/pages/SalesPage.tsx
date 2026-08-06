@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import React from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { saleApi, productApi, paymentMethodApi } from '../api/endpoints';
-import { Plus, ShoppingCart, Trash2, Eye, Edit } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Plus, ShoppingCart } from 'lucide-react';
 import { FilterSortPanel } from '../components/FilterSortPanel';
 import { SortableTableHeader } from '../components/SortableTableHeader';
+import { formatDateTimeLocal, formatDateLocal } from '../utils/datetime';
 import { useNavigate } from 'react-router-dom';
 
 export default function SalesPage() {
@@ -15,9 +14,7 @@ export default function SalesPage() {
   const [sortBy, setSortBy] = useState('time');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const queryClient = useQueryClient();
 
-  // Get filter options
   const { data: products } = useQuery({
     queryKey: ['products-filter'],
     queryFn: () => productApi.find({ size: 100, is_active: true }),
@@ -49,31 +46,7 @@ export default function SalesPage() {
     },
   });
 
-  const handleDelete = async (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm(`¿Estás seguro de que quieres eliminar la venta #${id}?`)) {
-      return;
-    }
-
-    try {
-      await saleApi.delete(id);
-      queryClient.invalidateQueries({ queryKey: ['sales'] });
-      toast.success('Venta eliminada correctamente');
-    } catch (error) {
-      console.error('Error deleting sale:', error);
-      toast.error('Error al eliminar la venta');
-    }
-  };
-
-  const handleView = (saleId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/sales/${saleId}`);
-  };
-
-  const handleEdit = (saleId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/sales/${saleId}/edit`);
-  };
+  const openSale = (saleId: number) => navigate(`/sales/${saleId}/edit`);
 
   return (
     <div>
@@ -93,7 +66,6 @@ export default function SalesPage() {
         </button>
       </div>
 
-      {/* Filters */}
       <FilterSortPanel
         searchValue={search}
         onSearchChange={setSearch}
@@ -104,26 +76,20 @@ export default function SalesPage() {
             label: 'Método de Pago',
             type: 'multiselect',
             placeholder: 'Buscar métodos de pago...',
-            options: (() => {
-              const pmOptions = paymentMethods?.items.map(pm => ({
-                value: pm.id,
-                label: pm.name
-              })) || [];
-              return pmOptions;
-            })()
+            options: paymentMethods?.items.map(pm => ({
+              value: pm.id,
+              label: pm.name
+            })) || []
           },
           {
             key: 'product_ids',
             label: 'Productos',
             type: 'multiselect',
             placeholder: 'Buscar productos...',
-            options: (() => {
-              const prodOptions = products?.items.map(product => ({
-                value: product.id,
-                label: product.name
-              })) || [];
-              return prodOptions;
-            })()
+            options: products?.items.map(product => ({
+              value: product.id,
+              label: product.name
+            })) || []
           },
           {
             key: 'date_range',
@@ -136,14 +102,14 @@ export default function SalesPage() {
           {
             key: 'min_total_price',
             label: 'Precio mínimo',
-            type: 'number',
+            type: 'money',
             placeholder: '0.00',
             min: 0
           },
           {
             key: 'max_total_price',
             label: 'Precio máximo',
-            type: 'number',
+            type: 'money',
             placeholder: '9999.99',
             min: 0
           }
@@ -152,7 +118,6 @@ export default function SalesPage() {
         onFiltersChange={setFilters}
       />
 
-      {/* Desktop Sales Table - Hidden on mobile */}
       <div className="hidden md:block bg-white shadow rounded-lg">
         {isLoading ? (
           <div className="p-8 text-center">
@@ -172,17 +137,6 @@ export default function SalesPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <SortableTableHeader
-                    field="id"
-                    currentSort={sortBy}
-                    currentSortOrder={sortOrder}
-                    onSortChange={(field, order) => {
-                      setSortBy(field);
-                      setSortOrder(order);
-                    }}
-                  >
-                    ID
-                  </SortableTableHeader>
                   <SortableTableHeader
                     field="time"
                     currentSort={sortBy}
@@ -222,29 +176,17 @@ export default function SalesPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Productos
                   </th>
-                  <th className="relative px-6 py-3">
-                    <span className="sr-only">Acciones</span>
-                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {sales?.items.map((sale) => (
                   <tr 
                     key={sale.id}
-                    className="hover:bg-gray-50 transition-colors duration-150"
+                    className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                    onClick={() => openSale(sale.id)}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{sale.id}
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(sale.time).toLocaleString('es-ES', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                      })}
+                      {formatDateTimeLocal(sale.time)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {sale.created_by_username}
@@ -253,8 +195,8 @@ export default function SalesPage() {
                       {sale.payment_methods && sale.payment_methods.length > 0 ? (
                         <div className="space-y-1">
                           {sale.payment_methods.map((pm, index) => (
-                            <div key={index} className="flex items-center justify-between text-xs">
-                              <div className="flex items-center">
+                            <div key={index} className="flex items-center text-xs">
+                              <div className="flex items-center flex-1">
                                 <span className="font-medium">{pm.payment_method_name}</span>
                                 {pm.discount_percentage > 0 && (
                                   <span className="text-orange-600 text-xs ml-1">
@@ -263,7 +205,7 @@ export default function SalesPage() {
                                 )}
                                 <span className="text-gray-500">:</span>
                               </div>
-                              <span className="text-green-600">
+                              <span className="text-green-600 ml-1">
                                 ${pm.amount.toFixed(2)}
                               </span>
                             </div>
@@ -287,31 +229,6 @@ export default function SalesPage() {
                         ))}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={(e) => handleView(sale.id, e)}
-                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors duration-150"
-                          title="Ver detalles"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleEdit(sale.id, e)}
-                          className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors duration-150"
-                          title="Editar"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDelete(sale.id, e)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -320,7 +237,6 @@ export default function SalesPage() {
         )}
       </div>
 
-      {/* Mobile Sales Cards - Hidden on desktop */}
       <div className="md:hidden space-y-4">
         {isLoading ? (
           <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
@@ -337,13 +253,17 @@ export default function SalesPage() {
           </div>
         ) : (
           sales?.items.map((sale) => (
-            <div key={sale.id} className="bg-white rounded-lg shadow p-4">
+            <div
+              key={sale.id}
+              className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => openSale(sale.id)}
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
                     <h3 className="text-lg font-medium text-gray-900">Venta #{sale.id}</h3>
                     <span className="text-sm text-gray-500">
-                      {new Date(sale.time).toLocaleDateString('es-ES')}
+                      {formatDateLocal(sale.time)}
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mb-1">
@@ -352,29 +272,6 @@ export default function SalesPage() {
                   <p className="text-lg font-semibold text-green-600">
                     ${sale.total_price.toFixed(2)}
                   </p>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={(e) => handleView(sale.id, e)}
-                    className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition-colors duration-150"
-                    title="Ver detalles"
-                  >
-                    <Eye className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={(e) => handleEdit(sale.id, e)}
-                    className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded transition-colors duration-150"
-                    title="Editar"
-                  >
-                    <Edit className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={(e) => handleDelete(sale.id, e)}
-                    className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-150"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
                 </div>
               </div>
               
@@ -412,4 +309,4 @@ export default function SalesPage() {
       </div>
     </div>
   );
-} 
+}

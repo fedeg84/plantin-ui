@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, X } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { formatDateTimeLocal, formatApiDateOnly } from '../utils/datetime';
 
 interface DateRangePickerProps {
   startDate?: string;
@@ -8,14 +9,16 @@ interface DateRangePickerProps {
   onChange: (startDate?: string, endDate?: string) => void;
   placeholder?: string;
   className?: string;
+  dateOnly?: boolean; // Si es true, usa input type="date" en lugar de datetime-local
 }
 
 export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   startDate,
   endDate,
   onChange,
-  placeholder = "Seleccionar rango de fechas y horas",
-  className
+  placeholder,
+  className,
+  dateOnly = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [tempStartDate, setTempStartDate] = useState(startDate || '');
@@ -32,14 +35,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
+    if (dateOnly) {
+      return formatApiDateOnly(dateString);
+    }
+    return formatDateTimeLocal(dateString);
   };
 
   // Aplicar cambios
@@ -88,7 +87,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
           (!startDate && !endDate) && "text-gray-500"
         )}
       >
-        <span>{formatDateRange() || placeholder}</span>
+        <span>{formatDateRange() || placeholder || (dateOnly ? "Seleccionar rango de fechas" : "Seleccionar rango de fechas y horas")}</span>
         <div className="flex items-center gap-1">
           {(startDate || endDate) && (
             <button
@@ -111,10 +110,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
-                Fecha y hora desde
+                {dateOnly ? 'Fecha desde' : 'Fecha y hora desde'}
               </label>
               <input
-                type="datetime-local"
+                type={dateOnly ? "date" : "datetime-local"}
                 value={tempStartDate}
                 onChange={(e) => setTempStartDate(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -123,10 +122,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
-                Fecha y hora hasta
+                {dateOnly ? 'Fecha hasta' : 'Fecha y hora hasta'}
               </label>
               <input
-                type="datetime-local"
+                type={dateOnly ? "date" : "datetime-local"}
                 value={tempEndDate}
                 onChange={(e) => setTempEndDate(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"

@@ -7,7 +7,12 @@ import {
   UpdateProductRequest,
   Product,
   FindProductsRequest,
-  ProductTypeAttribute,
+  AttributeType,
+  CreateAttributeTypeRequest,
+  CreateAttributeTypeResponse,
+  FindAttributeTypesRequest,
+  ProductType,
+  FindProductTypesRequest,
   CreatePaymentMethodRequest,
   CreatePaymentMethodResponse,
   UpdatePaymentMethodRequest,
@@ -21,6 +26,21 @@ import {
   UpdateUserRequest,
   User,
   FindUsersRequest,
+  CreateShiftRequest,
+  CreateShiftResponse,
+  UpdateShiftRequest,
+  Shift,
+  FindShiftsRequest,
+  Expense,
+  CreateExpenseRequest,
+  CreateExpenseResponse,
+  UpdateExpenseRequest,
+  FindExpensesRequest,
+  ExpenseType,
+  CreateExpenseTypeRequest,
+  CreateExpenseTypeResponse,
+  UpdateExpenseTypeRequest,
+  FindExpenseTypesRequest,
   PaginatedResponse,
 } from '../types/api';
 
@@ -34,7 +54,7 @@ export const authApi = {
 export const productApi = {
   create: (data: CreateProductRequest): Promise<CreateProductResponse> =>
     apiClient.post('/products', data).then(res => res.data),
-  
+
   find: (params: FindProductsRequest): Promise<PaginatedResponse<Product>> =>
     apiClient.get('/products', { params }).then(res => res.data),
     
@@ -50,13 +70,20 @@ export const productApi = {
 
 // Product Type endpoints
 export const productTypeApi = {
-  find: (params: any): Promise<PaginatedResponse<any>> =>
+  find: (params: FindProductTypesRequest): Promise<PaginatedResponse<ProductType>> =>
     apiClient.get('/product-types', { params }).then(res => res.data),
-    
-  getAttributes: (productTypeId: number, withParentAttributes: boolean = false): Promise<PaginatedResponse<ProductTypeAttribute>> =>
-    apiClient.get(`/product-types/${productTypeId}/attributes`, { 
-      params: { with_parent_attributes: withParentAttributes }
-    }).then(res => res.data),
+};
+
+// Attribute Type endpoints
+export const attributeTypeApi = {
+  create: (data: CreateAttributeTypeRequest): Promise<CreateAttributeTypeResponse> =>
+    apiClient.post('/attribute-types', data).then(res => res.data),
+
+  find: (params: FindAttributeTypesRequest): Promise<PaginatedResponse<AttributeType>> =>
+    apiClient.get('/attribute-types', { params }).then(res => res.data),
+
+  delete: (id: number): Promise<void> =>
+    apiClient.delete(`/attribute-types/${id}`).then(res => res.data),
 };
 
 // Payment Method endpoints
@@ -142,4 +169,70 @@ export const fileApi = {
 
   delete: (id: number): Promise<void> =>
     apiClient.delete(`/files/${id}`).then(res => res.data),
+};
+
+// Shift endpoints
+export const shiftApi = {
+  create: (data: CreateShiftRequest): Promise<CreateShiftResponse> =>
+    apiClient.post('/shifts', data).then(res => res.data),
+  
+  find: (params: FindShiftsRequest): Promise<PaginatedResponse<Shift>> =>
+    apiClient.get('/shifts', { params }).then(res => res.data),
+    
+  getById: (id: number): Promise<Shift> =>
+    apiClient.get(`/shifts/${id}`).then(res => res.data),
+    
+  update: (id: number, data: UpdateShiftRequest): Promise<Shift> =>
+    apiClient.put(`/shifts/${id}`, data).then(res => res.data),
+    
+  delete: (id: number): Promise<void> =>
+    apiClient.delete(`/shifts/${id}`).then(res => res.data),
+};
+
+// Expense Type endpoints
+export const expenseTypeApi = {
+  create: (data: CreateExpenseTypeRequest): Promise<CreateExpenseTypeResponse> =>
+    apiClient.post('/expense-types', data).then(res => res.data),
+  
+  find: (params: FindExpenseTypesRequest): Promise<PaginatedResponse<ExpenseType>> =>
+    apiClient.get('/expense-types', { params }).then(res => res.data),
+    
+  getById: (id: number): Promise<ExpenseType> =>
+    apiClient.get(`/expense-types/${id}`).then(res => res.data),
+    
+  update: (id: number, data: UpdateExpenseTypeRequest): Promise<ExpenseType> =>
+    apiClient.put(`/expense-types/${id}`, data).then(res => res.data),
+    
+  delete: (id: number): Promise<void> =>
+    apiClient.delete(`/expense-types/${id}`).then(res => res.data),
+};
+
+// Expense endpoints
+export const expenseApi = {
+  create: (data: CreateExpenseRequest): Promise<CreateExpenseResponse> =>
+    apiClient.post('/expenses', data).then(res => res.data),
+  
+  find: (params: FindExpensesRequest): Promise<PaginatedResponse<Expense>> => {
+    // Convert array params to comma-separated strings for backend
+    const queryParams: any = { ...params };
+    if (params.created_by_ids && params.created_by_ids.length > 0) {
+      queryParams.created_by_ids = params.created_by_ids.join(',');
+    }
+    if (params.payment_method_ids && params.payment_method_ids.length > 0) {
+      queryParams.payment_method_ids = params.payment_method_ids.join(',');
+    }
+    if (params.expense_type_ids && params.expense_type_ids.length > 0) {
+      queryParams.expense_type_ids = params.expense_type_ids.join(',');
+    }
+    return apiClient.get('/expenses', { params: queryParams }).then(res => res.data);
+  },
+    
+  getById: (id: number): Promise<Expense> =>
+    apiClient.get(`/expenses/${id}`).then(res => res.data),
+    
+  update: (id: number, data: UpdateExpenseRequest): Promise<Expense> =>
+    apiClient.put(`/expenses/${id}`, data).then(res => res.data),
+    
+  delete: (id: number): Promise<void> =>
+    apiClient.delete(`/expenses/${id}`).then(res => res.data),
 }; 

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { userApi } from '../api/endpoints';
 import { User, FindUsersRequest } from '../types/api';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../utils/cn';
+import { formatDateLocal } from '../utils/datetime';
 import UserAvatar from '../components/UserAvatar';
 
 const UsersPage: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useState<FindUsersRequest>({
     page: 0,
     size: 10,
@@ -20,13 +20,6 @@ const UsersPage: React.FC = () => {
   const { data: usersData, isLoading, error } = useQuery({
     queryKey: ['users', searchParams],
     queryFn: () => userApi.find(searchParams),
-  });
-
-  const deleteUserMutation = useMutation({
-    mutationFn: (id: number) => userApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-    },
   });
 
   const handleSearch = (search: string) => {
@@ -45,11 +38,7 @@ const UsersPage: React.FC = () => {
     }));
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
-      deleteUserMutation.mutate(id);
-    }
-  };
+  const openUser = (id: number) => navigate(`/admin/users/${id}/edit`);
 
   const getRoleBadge = (role: string) => {
     const isAdmin = role === 'ADMIN';
@@ -162,27 +151,28 @@ const UsersPage: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onClick={() => handleSort('created_at')}>
                   Fecha Creación
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                     Cargando usuarios...
                   </td>
                 </tr>
               ) : usersData?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                     No se encontraron usuarios
                   </td>
                 </tr>
               ) : (
                 usersData?.items.map((user: User) => (
-                  <tr key={user.id} className={`hover:bg-gray-50 ${!user.is_active ? 'opacity-50 bg-gray-50' : ''}`}>
+                  <tr
+                    key={user.id}
+                    className={`hover:bg-gray-50 cursor-pointer ${!user.is_active ? 'opacity-50 bg-gray-50' : ''}`}
+                    onClick={() => openUser(user.id)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <UserAvatar 
                         pictureId={user.picture_id} 
@@ -203,33 +193,7 @@ const UsersPage: React.FC = () => {
                       {getStatusBadge(user.is_active)}
                     </td>
                     <td className={`px-6 py-4 whitespace-nowrap text-sm ${user.is_active ? 'text-gray-500' : 'text-gray-400'}`}>
-                      {new Date(user.created_at).toLocaleDateString('es-ES')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => navigate(`/admin/users/${user.id}`)}
-                          className={`p-1 ${user.is_active ? 'text-blue-600 hover:text-blue-900' : 'text-gray-400 hover:text-gray-500'}`}
-                          title="Ver detalles"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => navigate(`/admin/users/${user.id}/edit`)}
-                          className={`p-1 ${user.is_active ? 'text-indigo-600 hover:text-indigo-900' : 'text-gray-400 hover:text-gray-500'}`}
-                          title="Editar"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(user.id)}
-                          className={`p-1 ${user.is_active ? 'text-red-600 hover:text-red-900' : 'text-gray-400 hover:text-gray-500'}`}
-                          title="Eliminar"
-                          disabled={deleteUserMutation.isPending}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      {formatDateLocal(user.created_at)}
                     </td>
                   </tr>
                 ))
@@ -321,46 +285,24 @@ const UsersPage: React.FC = () => {
           </div>
         ) : (
           usersData?.items.map((user: User) => (
-            <div key={user.id} className={`bg-white rounded-lg shadow p-4 ${!user.is_active ? 'opacity-50' : ''}`}>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  <UserAvatar 
-                    pictureId={user.picture_id} 
-                    username={user.username} 
-                    size="medium" 
-                  />
-                  <div>
-                    <h3 className={`text-lg font-medium ${user.is_active ? 'text-gray-900' : 'text-gray-400'}`}>
-                      {user.name}
-                    </h3>
-                    <p className={`text-sm ${user.is_active ? 'text-gray-500' : 'text-gray-400'}`}>
-                      @{user.username}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => navigate(`/admin/users/${user.id}`)}
-                    className={`p-2 ${user.is_active ? 'text-blue-600 hover:text-blue-900' : 'text-gray-400 hover:text-gray-500'}`}
-                    title="Ver detalles"
-                  >
-                    <Eye className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => navigate(`/admin/users/${user.id}/edit`)}
-                    className={`p-2 ${user.is_active ? 'text-indigo-600 hover:text-indigo-900' : 'text-gray-400 hover:text-gray-500'}`}
-                    title="Editar"
-                  >
-                    <Edit className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    className={`p-2 ${user.is_active ? 'text-red-600 hover:text-red-900' : 'text-gray-400 hover:text-gray-500'}`}
-                    title="Eliminar"
-                    disabled={deleteUserMutation.isPending}
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+            <div
+              key={user.id}
+              className={`bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow ${!user.is_active ? 'opacity-50' : ''}`}
+              onClick={() => openUser(user.id)}
+            >
+              <div className="flex items-center space-x-3">
+                <UserAvatar 
+                  pictureId={user.picture_id} 
+                  username={user.username} 
+                  size="medium" 
+                />
+                <div>
+                  <h3 className={`text-lg font-medium ${user.is_active ? 'text-gray-900' : 'text-gray-400'}`}>
+                    {user.name}
+                  </h3>
+                  <p className={`text-sm ${user.is_active ? 'text-gray-500' : 'text-gray-400'}`}>
+                    @{user.username}
+                  </p>
                 </div>
               </div>
               
@@ -378,7 +320,7 @@ const UsersPage: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500">Creado:</span>
                   <span className={`text-sm ${user.is_active ? 'text-gray-900' : 'text-gray-400'}`}>
-                    {new Date(user.created_at).toLocaleDateString('es-ES')}
+                    {formatDateLocal(user.created_at)}
                   </span>
                 </div>
               </div>

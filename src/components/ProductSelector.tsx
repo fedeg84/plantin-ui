@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { productApi } from '../api/endpoints';
 import { Product } from '../types/api';
@@ -10,12 +10,14 @@ interface ProductSelectorProps {
   onChange: (productId: number, product?: Product) => void;
   placeholder?: string;
   error?: string;
+  variant?: 'default' | 'placeholder';
 }
 
-export default function ProductSelector({ value, onChange, placeholder = "Seleccionar producto", error }: ProductSelectorProps) {
+export default function ProductSelector({ value, onChange, placeholder = "Seleccionar producto", error, variant = 'default' }: ProductSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['products', { search, size: 50 }],
@@ -52,6 +54,24 @@ export default function ProductSelector({ value, onChange, placeholder = "Selecc
     }
   }, [value, selectedProductData, onChange]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setSearch('');
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   const handleSelect = (product: Product) => {
     setSelectedProduct(product);
     onChange(product.id, product);
@@ -60,14 +80,15 @@ export default function ProductSelector({ value, onChange, placeholder = "Selecc
   };
 
   return (
-    <div className="relative">
+    <div ref={dropdownRef} className="relative">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "input w-full text-left flex items-center justify-between",
           error && "border-red-300 focus:border-red-500 focus:ring-red-500",
-          !selectedProduct && "text-gray-500"
+          !selectedProduct && "text-gray-500",
+          variant === 'placeholder' && "bg-gray-50 border-dashed border-gray-300 text-gray-400 hover:bg-gray-100"
         )}
       >
         <span className="truncate">

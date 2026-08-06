@@ -11,6 +11,7 @@ type SaleDateFilterProps = {
   dateTo: string;
   onDateToChange: (value: string) => void;
   className?: string;
+  inline?: boolean;
 };
 
 export default function SaleDateFilter({
@@ -23,11 +24,12 @@ export default function SaleDateFilter({
   dateTo,
   onDateToChange,
   className,
+  inline = false,
 }: SaleDateFilterProps) {
   const rangeInvalid = selectRange && !isSaleDateRangeValid(selectRange, dateFrom, dateTo);
 
   return (
-    <div className={cn('bg-white shadow rounded-lg p-4', className)}>
+    <div className={cn(!inline && 'bg-white shadow rounded-lg p-4', className)}>
       {!selectRange ? (
         <div className="w-full sm:max-w-xs">
           <label htmlFor="sale-date-single" className="block text-sm font-medium text-gray-700 mb-1">

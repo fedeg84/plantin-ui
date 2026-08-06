@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, ShoppingCart, DollarSign } from 'lucide-react';
+import { ShoppingCart, DollarSign } from 'lucide-react';
 import { saleApi, productApi, paymentMethodApi } from '../api/endpoints';
 import { Sale } from '../types/api';
 import SaleDateFilter from '../components/SaleDateFilter';
 import { FilterSortPanel } from '../components/FilterSortPanel';
-import { formatTimeLocal } from '../utils/datetime';
+import { formatApiDateOnly, formatDateTimeLocal, formatTimeLocal } from '../utils/datetime';
 import { saleTimeRange, toDateInputValue, isSaleDateRangeValid } from '../utils/saleDateRange';
 
 const PAGE_SIZE = 20;
@@ -86,6 +86,17 @@ export default function AdminDashboardPage() {
 
   const formatTime = (dateString: string) => formatTimeLocal(dateString);
 
+  const appliedDateFilterLabel = useMemo(() => {
+    if (!rangeValid) return null;
+    if (selectRange) {
+      return `Del ${formatApiDateOnly(dateFrom)} al ${formatApiDateOnly(dateTo)}`;
+    }
+    return formatApiDateOnly(singleDate);
+  }, [selectRange, singleDate, dateFrom, dateTo, rangeValid]);
+
+  const formatSaleTimestamp = (dateString: string) =>
+    selectRange ? formatDateTimeLocal(dateString) : formatTime(dateString);
+
   const openSale = (saleId: number) => navigate(`/sales/${saleId}/edit`);
 
   const handleFiltersChange = (next: Record<string, any>) => {
@@ -113,39 +124,9 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Historial de ventas</h1>
-        </div>
-
-        <button
-          onClick={() => navigate('/sales/create')}
-          className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva Venta
-        </button>
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Historial de ventas</h1>
       </div>
-
-      <SaleDateFilter
-        selectRange={selectRange}
-        onSelectRangeChange={handleSelectRangeChange}
-        singleDate={singleDate}
-        onSingleDateChange={(value) => {
-          setSingleDate(value);
-          resetPage();
-        }}
-        dateFrom={dateFrom}
-        onDateFromChange={(value) => {
-          setDateFrom(value);
-          resetPage();
-        }}
-        dateTo={dateTo}
-        onDateToChange={(value) => {
-          setDateTo(value);
-          resetPage();
-        }}
-      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white shadow rounded-lg p-6">
@@ -181,6 +162,28 @@ export default function AdminDashboardPage() {
         searchValue={search}
         onSearchChange={handleSearchChange}
         searchPlaceholder="Buscar ventas por producto, vendedor..."
+        extraFilterContent={
+          <SaleDateFilter
+            inline
+            selectRange={selectRange}
+            onSelectRangeChange={handleSelectRangeChange}
+            singleDate={singleDate}
+            onSingleDateChange={(value) => {
+              setSingleDate(value);
+              resetPage();
+            }}
+            dateFrom={dateFrom}
+            onDateFromChange={(value) => {
+              setDateFrom(value);
+              resetPage();
+            }}
+            dateTo={dateTo}
+            onDateToChange={(value) => {
+              setDateTo(value);
+              resetPage();
+            }}
+          />
+        }
         filterFields={[
           {
             key: 'payment_method_ids',
@@ -226,6 +229,9 @@ export default function AdminDashboardPage() {
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">Ventas</h2>
+          {appliedDateFilterLabel && (
+            <p className="mt-1 text-sm text-gray-500">{appliedDateFilterLabel}</p>
+          )}
         </div>
 
         <div className="divide-y divide-gray-200">
@@ -287,7 +293,7 @@ export default function AdminDashboardPage() {
                           <p className="text-sm text-gray-500 italic">Sin productos</p>
                         )}
                         <p className="text-xs text-gray-400 mt-1">
-                          {formatTime(sale.time)}
+                          {formatSaleTimestamp(sale.time)}
                           {sale.created_by_username ? ` · ${sale.created_by_username}` : ''}
                         </p>
                       </div>

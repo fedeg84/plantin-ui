@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Filter, X } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { SearchableMultiSelect } from './SearchableMultiSelect';
@@ -28,6 +28,7 @@ interface FilterSortPanelProps {
   filterFields: FilterField[];
   currentFilters: Record<string, any>;
   onFiltersChange: (filters: Record<string, any>) => void;
+  extraFilterContent?: ReactNode;
 }
 
 export const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
@@ -37,6 +38,7 @@ export const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
   filterFields,
   currentFilters,
   onFiltersChange,
+  extraFilterContent,
 }) => {
   const [showFilters, setShowFilters] = useState(false);
 
@@ -79,7 +81,7 @@ export const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
         {/* Controls */}
         <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-shrink-0">
           {/* Filter Toggle */}
-          {filterFields.length > 0 && (
+          {(filterFields.length > 0 || extraFilterContent) && (
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={cn(
@@ -100,7 +102,7 @@ export const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
       </div>
 
       {/* Filters Panel */}
-      {showFilters && filterFields.length > 0 && (
+      {showFilters && (filterFields.length > 0 || extraFilterContent) && (
         <div className="bg-gray-50 p-4 rounded-lg border">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-900">Filtros</h3>
@@ -116,6 +118,9 @@ export const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {extraFilterContent && (
+              <div className="col-span-full">{extraFilterContent}</div>
+            )}
             {filterFields.map(field => (
               <div key={field.key}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

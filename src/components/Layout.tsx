@@ -6,6 +6,7 @@ import { userApi } from '../api/endpoints';
 import { 
   Menu, 
   X, 
+  Home,
   Plus, 
   Package, 
   ShoppingCart, 
@@ -78,6 +79,12 @@ export default function Layout({ children }: LayoutProps) {
     pathname.startsWith('/admin/expense-types');
 
   const navigation: NavItem[] = [
+    {
+      name: 'Home',
+      href: '/home',
+      icon: Home,
+      isActive: (pathname) => pathname === '/home' || pathname === '/',
+    },
     { name: 'Nueva Venta', href: '/sales/create', icon: Plus },
     { name: 'Ventas', href: '/sales', icon: ShoppingCart },
     { name: 'Productos', href: '/products', icon: Package, isActive: isProductsSection },
@@ -147,7 +154,11 @@ export default function Layout({ children }: LayoutProps) {
           
           <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
             <div className="flex-shrink-0 flex items-center px-4">
-              <Link to="/home" className="text-2xl font-bold text-primary-600 hover:text-primary-700 cursor-pointer">
+              <Link
+                to="/home"
+                onClick={() => setSidebarOpen(false)}
+                className="text-2xl font-bold text-primary-600 hover:text-primary-700 cursor-pointer"
+              >
                 Plantin
               </Link>
             </div>

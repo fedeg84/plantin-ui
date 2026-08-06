@@ -69,6 +69,7 @@ export default function ProductDetailPage() {
       toast.success('Producto actualizado correctamente');
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product', id] });
+      queryClient.invalidateQueries({ queryKey: ['restock-products'] });
     },
     onError: () => {
       toast.error('Error al actualizar el producto');
@@ -80,6 +81,7 @@ export default function ProductDetailPage() {
     onSuccess: () => {
       toast.success('Producto eliminado correctamente');
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['restock-products'] });
       navigate('/products');
     },
     onError: () => {

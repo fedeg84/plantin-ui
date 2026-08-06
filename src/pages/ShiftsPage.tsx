@@ -4,12 +4,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { shiftApi, userApi } from '../api/endpoints';
-import { Plus, Clock, X, Trash2 } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import WeeklyShiftsCalendar from '../components/WeeklyShiftsCalendar';
 import TimePickerSelect from '../components/TimePickerSelect';
 import { SearchableMultiSelect } from '../components/SearchableMultiSelect';
 import type { DayOfWeek, Shift } from '../types/api';
+import { getApiErrorMessage } from '../utils/apiErrors';
 
 const DAY_NAMES: Record<DayOfWeek, string> = {
   monday: 'Lunes',
@@ -37,6 +38,8 @@ export default function ShiftsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingShift, setEditingShift] = useState<number | null>(null);
+  const [onlyThisWeek, setOnlyThisWeek] = useState(false);
+  const [onlyThisWeekCreate, setOnlyThisWeekCreate] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const queryClient = useQueryClient();
 
@@ -49,7 +52,7 @@ export default function ShiftsPage() {
   // Fetch all shifts for the calendar
   const { data: shiftsData, isLoading } = useQuery({
     queryKey: ['shifts', 'all'],
-    queryFn: () => shiftApi.find({ size: 100 }),
+    queryFn: () => shiftApi.find({ size: 100, effective_for_current_week: true }),
   });
 
   const shifts = shiftsData?.items || [];
@@ -93,33 +96,38 @@ export default function ShiftsPage() {
       setValueEdit('start_time', editShiftData.start_time.substring(0, 5));
       setValueEdit('end_time', editShiftData.end_time.substring(0, 5));
       setValueEdit('user_ids', editShiftData.users.map(u => u.id));
+      setOnlyThisWeek(false);
     }
   }, [editShiftData, setValueEdit]);
 
   const createMutation = useMutation({
-    mutationFn: (data: ShiftForm) => shiftApi.create({
-      ...data,
-      start_time: `${data.start_time}:00`,
-      end_time: `${data.end_time}:00`,
-    }),
+    mutationFn: ({ data, only_this_week }: { data: ShiftForm; only_this_week: boolean }) =>
+      shiftApi.create({
+        ...data,
+        start_time: `${data.start_time}:00`,
+        end_time: `${data.end_time}:00`,
+        only_this_week,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
       toast.success('Turno creado exitosamente');
       resetCreate();
+      setOnlyThisWeekCreate(false);
       setShowCreateForm(false);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Error al crear el turno');
+      toast.error(getApiErrorMessage(error, 'Error al crear el turno'));
       console.error('Error creating shift:', error);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: ShiftForm }) =>
+    mutationFn: ({ id, data, only_this_week }: { id: number; data: ShiftForm; only_this_week: boolean }) =>
       shiftApi.update(id, {
         ...data,
         start_time: `${data.start_time}:00`,
         end_time: `${data.end_time}:00`,
+        only_this_week,
       }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
@@ -130,33 +138,49 @@ export default function ShiftsPage() {
       setEditingShift(null);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Error al actualizar el turno');
+      toast.error(getApiErrorMessage(error, 'Error al actualizar el turno'));
       console.error('Error updating shift:', error);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => shiftApi.delete(id),
-    onSuccess: () => {
+    mutationFn: ({ id }: { id: number; restore?: boolean }) => shiftApi.delete(id),
+    onSuccess: (_, { restore }) => {
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
-      toast.success('Turno eliminado correctamente');
+      toast.success(restore ? 'Turno restaurado correctamente' : 'Turno eliminado correctamente');
       setShowEditForm(false);
       setEditingShift(null);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Error al eliminar el turno');
+      toast.error(getApiErrorMessage(error, 'Error al eliminar el turno'));
       console.error('Error deleting shift:', error);
     },
   });
 
   const onSubmitCreate = (data: ShiftForm) => {
-    createMutation.mutate(data);
+    createMutation.mutate({ data, only_this_week: onlyThisWeekCreate });
   };
 
   const onSubmitEdit = (data: ShiftForm) => {
     if (editingShift) {
-      updateMutation.mutate({ id: editingShift, data });
+      const applyWeeklyOverride = onlyThisWeek && !editShiftData?.replaces_shift_id;
+      updateMutation.mutate({
+        id: editingShift,
+        data,
+        only_this_week: applyWeeklyOverride,
+      });
     }
+  };
+
+  const handleCreateShiftClick = (day: DayOfWeek) => {
+    resetCreate({
+      day_of_week: day,
+      start_time: '09:00',
+      end_time: '17:00',
+      user_ids: [],
+    });
+    setOnlyThisWeekCreate(false);
+    setShowCreateForm(true);
   };
 
   const handleShiftClick = (shift: Shift) => {
@@ -168,7 +192,17 @@ export default function ShiftsPage() {
     if (!confirm(`¿Estás seguro de que quieres eliminar este turno de ${usernames}?`)) {
       return;
     }
-    deleteMutation.mutate(id);
+    deleteMutation.mutate({ id, restore: false });
+  };
+
+  const handleRestoreShift = (id: number, isReplacement: boolean) => {
+    const message = isReplacement
+      ? '¿Restaurar el turno habitual? Se eliminará el cambio de esta semana.'
+      : '¿Eliminar este turno? Solo aplicaba para esta semana.';
+    if (!confirm(message)) {
+      return;
+    }
+    deleteMutation.mutate({ id, restore: isReplacement });
   };
 
   const handleToggleUser = (userId: number) => {
@@ -183,18 +217,8 @@ export default function ShiftsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Turnos de Trabajo</h1>
-        </div>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Turno
-        </button>
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Turnos de Trabajo</h1>
       </div>
 
       {/* Weekly Calendar */}
@@ -204,18 +228,11 @@ export default function ShiftsPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
             <p className="mt-2 text-gray-600">Cargando turnos...</p>
           </div>
-        ) : shifts.length === 0 ? (
-          <div className="p-8 text-center">
-            <Clock className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Sin turnos</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Comienza creando el primer turno.
-            </p>
-          </div>
         ) : (
           <WeeklyShiftsCalendar
             shifts={shifts}
             onShiftClick={handleShiftClick}
+            onAddShiftClick={handleCreateShiftClick}
             selectedUserIds={selectedUserIds}
             onToggleUser={handleToggleUser}
           />
@@ -241,6 +258,7 @@ export default function ShiftsPage() {
                     onClick={() => {
                       setShowCreateForm(false);
                       resetCreate();
+                      setOnlyThisWeekCreate(false);
                     }}
                     className="text-gray-400 hover:text-gray-600"
                   >
@@ -298,12 +316,28 @@ export default function ShiftsPage() {
                   />
                 </div>
 
+                <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={onlyThisWeekCreate}
+                    onChange={(e) => setOnlyThisWeekCreate(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <span>
+                    Solo esta semana
+                    <span className="block text-xs text-gray-500 mt-0.5">
+                      El turno se mostrará únicamente hasta el domingo de esta semana.
+                    </span>
+                  </span>
+                </label>
+
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
                     onClick={() => {
                       setShowCreateForm(false);
                       resetCreate();
+                      setOnlyThisWeekCreate(false);
                     }}
                     className="btn-secondary flex-1"
                     disabled={createMutation.isPending}
@@ -342,19 +376,21 @@ export default function ShiftsPage() {
                     Editar Turno
                   </h3>
                   <div className="flex items-center space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (editingShift && editShiftData) {
-                          const usernames = editShiftData.users.map(u => u.username).join(', ');
-                          handleDeleteShift(editingShift, usernames);
-                        }
-                      }}
-                      className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
-                      title="Eliminar"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
+                    {!editShiftData.replaces_shift_until_date && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (editingShift && editShiftData) {
+                            const usernames = editShiftData.users.map(u => u.username).join(', ');
+                            handleDeleteShift(editingShift, usernames);
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-150"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
@@ -418,6 +454,44 @@ export default function ShiftsPage() {
                     error={errorsEdit.end_time?.message}
                   />
                 </div>
+
+                {editShiftData.replaces_shift_until_date ? (
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    <p className="flex-1">Este turno aplica solo para esta semana.</p>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        editingShift &&
+                        handleRestoreShift(editingShift, !!editShiftData.replaces_shift_id)
+                      }
+                      disabled={deleteMutation.isPending}
+                      className="btn-secondary text-xs px-2.5 py-1 shrink-0 disabled:opacity-50"
+                    >
+                      {deleteMutation.isPending
+                        ? editShiftData.replaces_shift_id
+                          ? 'Restaurando...'
+                          : 'Eliminando...'
+                        : editShiftData.replaces_shift_id
+                          ? 'Restaurar turno'
+                          : 'Eliminar turno'}
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex items-start gap-2 text-sm text-gray-700 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={onlyThisWeek}
+                      onChange={(e) => setOnlyThisWeek(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span>
+                      Solo esta semana
+                      <span className="block text-xs text-gray-500 mt-0.5">
+                        Crea un cambio temporal sin modificar el turno habitual a partir del lunes.
+                      </span>
+                    </span>
+                  </label>
+                )}
 
                 <div className="flex gap-3 pt-4">
                   <button

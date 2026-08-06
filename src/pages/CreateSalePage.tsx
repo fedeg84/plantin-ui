@@ -90,6 +90,7 @@ export default function CreateSalePage() {
       queryClient.invalidateQueries({ queryKey: ['sales'] });
       queryClient.invalidateQueries({ queryKey: ['products'] }); // Invalidate products to refresh stock
       queryClient.invalidateQueries({ queryKey: ['product'] }); // Invalidate individual product queries too
+      queryClient.invalidateQueries({ queryKey: ['restock-products'] });
       toast.success('Venta creada correctamente');
       navigate('/sales');
     },

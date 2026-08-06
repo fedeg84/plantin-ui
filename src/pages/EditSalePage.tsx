@@ -106,6 +106,7 @@ export default function EditSalePage() {
       queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['product'] });
+      queryClient.invalidateQueries({ queryKey: ['restock-products'] });
       toast.success('Venta actualizada correctamente');
       navigate('/sales');
     },
@@ -119,6 +120,8 @@ export default function EditSalePage() {
     mutationFn: () => saleApi.delete(saleId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['restock-products'] });
       toast.success('Venta eliminada correctamente');
       navigate('/sales');
     },

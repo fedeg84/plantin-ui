@@ -308,7 +308,8 @@ export interface CreateShiftRequest {
   day_of_week: DayOfWeek;
   start_time: string; // HH:MM:SS format
   end_time: string;   // HH:MM:SS format
-  user_ids: number[];  // Changed from user_id to user_ids
+  user_ids: number[];
+  only_this_week?: boolean;
 }
 
 export interface CreateShiftResponse {
@@ -319,7 +320,8 @@ export interface UpdateShiftRequest {
   day_of_week?: DayOfWeek;
   start_time?: string;
   end_time?: string;
-  user_ids?: number[];  // Changed from user_id to user_ids
+  user_ids?: number[];
+  only_this_week?: boolean;
 }
 
 export interface Shift {
@@ -327,9 +329,11 @@ export interface Shift {
   day_of_week: DayOfWeek;
   start_time: string;
   end_time: string;
-  users: ShiftUser[];  // Changed from single user_id/username to array of users
+  users: ShiftUser[];
   created_at: string;
   created_by_username?: string;
+  replaces_shift_id?: number | null;
+  replaces_shift_until_date?: string | null;
 }
 
 export interface FindShiftsRequest {
@@ -340,6 +344,7 @@ export interface FindShiftsRequest {
   size?: number;
   sort_by?: 'day_of_week' | 'start_time' | 'end_time' | 'user' | 'created_at' | 'created_by';
   sort_order?: 'asc' | 'desc';
+  effective_for_current_week?: boolean;
 }
 
 // Expense Type types

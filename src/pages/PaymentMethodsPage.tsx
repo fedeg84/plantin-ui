@@ -4,9 +4,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { paymentMethodApi } from '../api/endpoints';
-import { Plus, CreditCard, Edit, X } from 'lucide-react';
+import { Plus, CreditCard, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { FilterSortPanel } from '../components/FilterSortPanel';
+import { formatDateLocal } from '../utils/datetime';
 
 const createPaymentMethodSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -104,7 +105,10 @@ export default function PaymentMethodsPage() {
   });
 
   const onSubmit = (data: CreatePaymentMethodForm) => {
-    createMutation.mutate(data);
+    createMutation.mutate({
+      ...data,
+      is_active: true, // Los métodos nuevos siempre se crean activos
+    });
   };
 
   const onSubmitEdit = (data: CreatePaymentMethodForm) => {
@@ -120,16 +124,13 @@ export default function PaymentMethodsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Métodos de Pago</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Configura los métodos de pago disponibles
-          </p>
         </div>
         <button
           onClick={() => setShowCreateForm(true)}
-          className="btn-primary flex items-center"
+          className="btn-primary flex items-center justify-center w-full sm:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           Nuevo Método de Pago
@@ -186,17 +187,6 @@ export default function PaymentMethodsPage() {
                       <p className="mt-1 text-sm text-gray-500">
                         Descuento aplicado automáticamente al usar este método de pago
                       </p>
-                    </div>
-
-                    <div className="flex items-center">
-                      <input
-                        {...register('is_active')}
-                        type="checkbox"
-                        className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                      />
-                      <label className="ml-2 block text-sm text-gray-900">
-                        Método activo
-                      </label>
                     </div>
                   </div>
                 </div>
@@ -256,49 +246,37 @@ export default function PaymentMethodsPage() {
               {paymentMethods?.items.map((paymentMethod) => (
                 <div
                   key={paymentMethod.id}
-                  className={`border rounded-lg p-4 transition-colors ${
+                  className={`border rounded-lg p-4 transition-colors cursor-pointer ${
                     paymentMethod.is_active
                       ? 'border-gray-200 hover:bg-gray-50'
                       : 'border-gray-300 bg-gray-50 opacity-75'
                   }`}
+                  onClick={() => handleEdit(paymentMethod)}
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className={`text-lg font-medium ${
-                          paymentMethod.is_active ? 'text-gray-900' : 'text-gray-500'
-                        }`}>
-                          {paymentMethod.name}
-                        </h4>
-                        {!paymentMethod.is_active && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                            Inactivo
-                          </span>
-                        )}
-                      </div>
-                      {(paymentMethod.discount ?? 0) > 0 && (
-                        <p className={`text-sm ${
-                          paymentMethod.is_active ? 'text-green-600' : 'text-gray-400'
-                        }`}>
-                          Descuento: {paymentMethod.discount}%
-                        </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className={`text-lg font-medium ${
+                        paymentMethod.is_active ? 'text-gray-900' : 'text-gray-500'
+                      }`}>
+                        {paymentMethod.name}
+                      </h4>
+                      {!paymentMethod.is_active && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                          Inactivo
+                        </span>
                       )}
-                      <p className="text-sm text-gray-500">
-                        Creado por {paymentMethod.created_by_username} el{' '}
-                        {new Date(paymentMethod.created_at).toLocaleDateString()}
-                      </p>
                     </div>
-                    <button
-                      onClick={() => handleEdit(paymentMethod)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        paymentMethod.is_active
-                          ? 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
-                          : 'text-gray-300 hover:text-gray-500 hover:bg-gray-200'
-                      }`}
-                      title="Editar método de pago"
-                    >
-                      <Edit className="h-5 w-5" />
-                    </button>
+                    {(paymentMethod.discount ?? 0) > 0 && (
+                      <p className={`text-sm ${
+                        paymentMethod.is_active ? 'text-green-600' : 'text-gray-400'
+                      }`}>
+                        Descuento: {paymentMethod.discount}%
+                      </p>
+                    )}
+                    <p className="text-sm text-gray-500">
+                      Creado por {paymentMethod.created_by_username} el{' '}
+                      {formatDateLocal(paymentMethod.created_at)}
+                    </p>
                   </div>
                 </div>
               ))}

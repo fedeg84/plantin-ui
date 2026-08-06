@@ -2,7 +2,9 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://plantin-api.up.railway.app';
+
+
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -30,9 +32,7 @@ export const apiClient = axios.create({
         }
       });
       
-      const result = searchParams.toString();
-      console.log('🌐 Serialized Params:', result);
-      return result;
+      return searchParams.toString();
     }
   }
 });
@@ -44,6 +44,7 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => {

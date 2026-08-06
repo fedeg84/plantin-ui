@@ -83,6 +83,7 @@ export const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
               >
                 {label}
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveOption(selectedValues[index]);

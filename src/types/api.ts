@@ -13,36 +13,54 @@ export interface CreateProductRequest {
   name: string;
   description?: string;
   code?: string;
-  type_id: number;
+  type_id?: number;
   price?: number;
   stock?: number;
   picture_id?: number;
-  attributes?: Record<number, string>; // attribute_id -> value
+  attributes?: ProductAttributeInput[];
+}
+
+export interface ProductAttributeInput {
+  attribute_type_id: number;
+  value: string;
 }
 
 export interface CreateProductResponse {
   id: number;
 }
 
-export interface ProductAttributeValue {
+export interface ProductAttribute {
   id?: number;
-  product_id: number;
-  product_type_attribute_id: number;
-  value?: string;
+  attribute_type_id: number;
+  attribute_type_name: string;
+  value: string;
   created_at?: string;
-  updated_at?: string;
+  created_by_id?: number;
+  created_by_username?: string;
 }
 
-export interface ProductTypeAttribute {
+export interface AttributeType {
   id: number;
   name: string;
-  product_type_id: number;
-  data_type: 'text' | 'number' | 'boolean' | 'date';
-  is_required: boolean;
-  display_order: number;
-  created_by: number;
   created_at: string;
-  updated_at?: string;
+  created_by_id?: number;
+  created_by_username?: string;
+}
+
+export interface CreateAttributeTypeRequest {
+  name: string;
+}
+
+export interface CreateAttributeTypeResponse {
+  id: number;
+}
+
+export interface FindAttributeTypesRequest {
+  search?: string;
+  page?: number;
+  size?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
 }
 
 export interface Product {
@@ -50,8 +68,8 @@ export interface Product {
   name: string;
   description?: string;
   code?: string;
-  type_id: number;
-  type_name: string;
+  type_id?: number;
+  type_name?: string;
   is_active: boolean;
   created_at: string;
   created_by_id: number;
@@ -59,18 +77,18 @@ export interface Product {
   picture_id?: number;
   current_price: number;
   current_stock: number;
-  attribute_values?: ProductAttributeValue[];
+  attributes?: ProductAttribute[];
 }
 
 export interface UpdateProductRequest {
   name: string;
   description?: string;
   code?: string;
-  type_id: number;
+  type_id?: number;
   current_price?: number;
   current_stock?: number;
   is_active?: boolean;
-  attributes?: Record<number, string>; // attribute_id -> value
+  attributes?: ProductAttributeInput[];
 }
 
 export interface FindProductsRequest {
@@ -131,6 +149,22 @@ export interface ProductType {
   created_by_username: string;
 }
 
+export interface CreateProductTypeRequest {
+  name: string;
+  description?: string;
+  parent_id?: number;
+}
+
+export interface UpdateProductTypeRequest {
+  name: string;
+  description?: string;
+  parent_id?: number;
+}
+
+export interface CreateProductTypeResponse {
+  id: number;
+}
+
 export interface FindProductTypesRequest {
   search?: string;
   page?: number;
@@ -141,23 +175,41 @@ export interface FindProductTypesRequest {
 
 // Sale types
 export interface CreateSaleItemRequest {
+  /** Al actualizar venta: id del sale_item; omitir en líneas nuevas. */
+  id?: number;
   product_id: number;
   quantity: number;
   price?: number;
+}
+
+export interface CreateSalePaymentMethodRequest {
+  /** Presente al actualizar una venta: id del sale_payment_method; omitir o null para una línea nueva. */
+  id?: number | null;
+  payment_method_id: number;
+  amount: number;
+  discount?: number;
 }
 
 export interface CreateSaleRequest {
   description?: string;
   sale_items: CreateSaleItemRequest[];
   price?: number;
-  discount?: number;
   user_id?: number;
   date?: string;
-  payment_method_id?: number;
+  payment_methods: CreateSalePaymentMethodRequest[];
 }
 
 export interface CreateSaleResponse {
   id: number;
+}
+
+export interface SalePaymentMethod {
+  id: number;
+  payment_method_id: number;
+  payment_method_name: string;
+  amount: number;
+  discount: number;
+  discount_percentage: number;
 }
 
 export interface Sale {
@@ -165,10 +217,8 @@ export interface Sale {
   time: string;
   created_by_id: number;
   created_by_username: string;
-  payment_method_id: number;
-  payment_method_name: string;
   total_price: number;
-  discount: number;
+  payment_methods: SalePaymentMethod[];
   items: SaleItem[];
 }
 
@@ -202,7 +252,179 @@ export interface PaginationInfo {
   total_items: number;
 }
 
+// User types
+export interface CreateUserRequest {
+  name: string;
+  username: string;
+  password: string;
+  picture_id?: number;
+  role: 'ADMIN' | 'USER';
+}
+
+export interface UpdateUserRequest {
+  name: string;
+  username: string;
+  password?: string;
+  picture_id?: number;
+  role: 'ADMIN' | 'USER';
+  is_active?: boolean;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  username: string;
+  role: 'ADMIN' | 'USER';
+  is_active: boolean;
+  created_at: string;
+  picture_id?: number;
+}
+
+export interface FindUsersRequest {
+  search?: string;
+  page?: number;
+  size?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  role?: 'ADMIN' | 'USER';
+  is_active?: boolean;
+}
+
 export interface PaginatedResponse<T> {
   items: T[];
   pagination: PaginationInfo;
+}
+
+// Shift types
+export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+
+export interface ShiftUser {
+  id: number;
+  username: string;
+  name: string;
+}
+
+export interface CreateShiftRequest {
+  day_of_week: DayOfWeek;
+  start_time: string; // HH:MM:SS format
+  end_time: string;   // HH:MM:SS format
+  user_ids: number[];
+  only_this_week?: boolean;
+}
+
+export interface CreateShiftResponse {
+  id: number;
+}
+
+export interface UpdateShiftRequest {
+  day_of_week?: DayOfWeek;
+  start_time?: string;
+  end_time?: string;
+  user_ids?: number[];
+  only_this_week?: boolean;
+}
+
+export interface Shift {
+  id: number;
+  day_of_week: DayOfWeek;
+  start_time: string;
+  end_time: string;
+  users: ShiftUser[];
+  created_at: string;
+  created_by_username?: string;
+  replaces_shift_id?: number | null;
+  replaces_shift_until_date?: string | null;
+}
+
+export interface FindShiftsRequest {
+  search?: string;
+  user_id?: number;
+  day_of_week?: DayOfWeek;
+  page?: number;
+  size?: number;
+  sort_by?: 'day_of_week' | 'start_time' | 'end_time' | 'user' | 'created_at' | 'created_by';
+  sort_order?: 'asc' | 'desc';
+  effective_for_current_week?: boolean;
+}
+
+// Expense Type types
+export interface ExpenseType {
+  id: number;
+  name: string;
+  parent_id?: number;
+  parent_name?: string;
+  created_at: string;
+  created_by_id?: number;
+  created_by_username?: string;
+}
+
+export interface CreateExpenseTypeRequest {
+  name: string;
+  parent_id?: number | null;
+}
+
+export interface CreateExpenseTypeResponse {
+  id: number;
+}
+
+export interface UpdateExpenseTypeRequest {
+  name: string;
+}
+
+export interface FindExpenseTypesRequest {
+  search?: string;
+  page?: number;
+  size?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+}
+
+// Expense types
+export interface Expense {
+  id: number;
+  description?: string;
+  amount: number;
+  date: string; // YYYY-MM-DD format (solo fecha)
+  created_date: string; // ISO datetime string (fecha y hora de creación)
+  created_by_id?: number;
+  created_by_username?: string;
+  payment_method_id?: number;
+  payment_method_name?: string;
+  expense_type_id?: number;
+  expense_type_name?: string;
+}
+
+export interface CreateExpenseRequest {
+  description?: string;
+  amount: number;
+  date: string; // YYYY-MM-DD format (solo fecha)
+  payment_method_id: number;
+  expense_type_id: number;
+}
+
+export interface CreateExpenseResponse {
+  id: number;
+}
+
+export interface UpdateExpenseRequest {
+  description?: string;
+  amount: number;
+  date: string; // YYYY-MM-DD format (solo fecha)
+  payment_method_id: number;
+  expense_type_id: number;
+}
+
+export interface FindExpensesRequest {
+  search?: string;
+  page?: number;
+  size?: number;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  created_by_ids?: number[];
+  payment_method_ids?: number[];
+  expense_type_ids?: number[];
+  min_date?: string; // YYYY-MM-DD format
+  max_date?: string; // YYYY-MM-DD format
+  min_amount?: number;
+  max_amount?: number;
 } 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { paymentMethodApi } from '../api/endpoints';
 import { PaymentMethod } from '../types/api';
@@ -10,12 +10,15 @@ interface PaymentMethodSelectorProps {
   onChange: (paymentMethodId: number, paymentMethod?: PaymentMethod) => void;
   placeholder?: string;
   error?: string;
+  variant?: 'default' | 'placeholder';
+  showDiscount?: boolean;
 }
 
-export default function PaymentMethodSelector({ value, onChange, placeholder = "Seleccionar método de pago", error }: PaymentMethodSelectorProps) {
+export default function PaymentMethodSelector({ value, onChange, placeholder = "Seleccionar método de pago", error, variant = 'default', showDiscount = false }: PaymentMethodSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { data: paymentMethods, isLoading } = useQuery({
     queryKey: ['payment-methods', { search, size: 50 }],
@@ -52,6 +55,24 @@ export default function PaymentMethodSelector({ value, onChange, placeholder = "
     }
   }, [value, selectedPaymentMethodData, onChange]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setSearch('');
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   const handleSelect = (paymentMethod: PaymentMethod) => {
     setSelectedPaymentMethod(paymentMethod);
     onChange(paymentMethod.id, paymentMethod);
@@ -60,21 +81,22 @@ export default function PaymentMethodSelector({ value, onChange, placeholder = "
   };
 
   return (
-    <div className="relative">
+    <div ref={dropdownRef} className="relative">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "input w-full text-left flex items-center justify-between",
           error && "border-red-300 focus:border-red-500 focus:ring-red-500",
-          !selectedPaymentMethod && "text-gray-500"
+          !selectedPaymentMethod && "text-gray-500",
+          variant === 'placeholder' && "bg-gray-50 border-dashed border-gray-300 text-gray-400 hover:bg-gray-100"
         )}
       >
         <span className="truncate">
           {selectedPaymentMethod ? (
             <span>
               {selectedPaymentMethod.name}
-              {(selectedPaymentMethod.discount ?? 0) > 0 && (
+              {showDiscount && (selectedPaymentMethod.discount ?? 0) > 0 && (
                 <span className="text-green-600 ml-1">(-{selectedPaymentMethod.discount}%)</span>
               )}
             </span>
@@ -114,7 +136,7 @@ export default function PaymentMethodSelector({ value, onChange, placeholder = "
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-sm">{paymentMethod.name}</span>
-                    {(paymentMethod.discount ?? 0) > 0 && (
+                    {showDiscount && (paymentMethod.discount ?? 0) > 0 && (
                       <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
                         -{paymentMethod.discount}%
                       </span>

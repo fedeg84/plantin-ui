@@ -29,7 +29,7 @@ export default function SaleDateFilter({
   return (
     <div className={cn('bg-white shadow rounded-lg p-4', className)}>
       {!selectRange ? (
-        <div className="max-w-xs">
+        <div className="w-full sm:max-w-xs">
           <label htmlFor="sale-date-single" className="block text-sm font-medium text-gray-700 mb-1">
             Fecha
           </label>
@@ -43,7 +43,7 @@ export default function SaleDateFilter({
         </div>
       ) : (
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-          <div className="flex-1 max-w-xs">
+          <div className="w-full sm:flex-1 sm:max-w-xs">
             <label htmlFor="sale-date-from" className="block text-sm font-medium text-gray-700 mb-1">
               Fecha desde
             </label>
@@ -56,7 +56,7 @@ export default function SaleDateFilter({
               className={cn('input w-full', rangeInvalid && 'border-red-300 focus:border-red-500 focus:ring-red-500')}
             />
           </div>
-          <div className="flex-1 max-w-xs">
+          <div className="w-full sm:flex-1 sm:max-w-xs">
             <label htmlFor="sale-date-to" className="block text-sm font-medium text-gray-700 mb-1">
               Fecha hasta
             </label>

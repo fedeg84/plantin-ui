@@ -100,14 +100,14 @@ const UsersPage: React.FC = () => {
         </nav>
       </div>
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
           <p className="text-gray-600 mt-1">Administra los usuarios del sistema</p>
         </div>
         <Link
           to="/admin/users/create"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           Nuevo Usuario

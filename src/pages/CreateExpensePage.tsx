@@ -175,18 +175,18 @@ export default function CreateExpensePage() {
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+          <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={() => navigate('/admin/payments')}
-              className="btn-secondary"
+              className="btn-secondary w-full sm:w-auto"
               disabled={createMutation.isPending}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="btn-primary"
+              className="btn-primary w-full sm:w-auto"
               disabled={createMutation.isPending}
             >
               {createMutation.isPending ? 'Creando...' : 'Crear Pago'}

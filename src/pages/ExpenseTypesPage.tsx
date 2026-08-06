@@ -222,8 +222,8 @@ export default function ExpenseTypesPage() {
 
   return (
     <div>
-      <div className="mb-6 flex justify-end">
-        <button onClick={() => openCreateForm(null)} className="btn-primary flex items-center">
+      <div className="mb-6 flex flex-col sm:flex-row sm:justify-end">
+        <button onClick={() => openCreateForm(null)} className="btn-primary flex items-center justify-center w-full sm:w-auto">
           <Plus className="h-5 w-5 mr-2" />
           Nuevo Tipo de Pago
         </button>

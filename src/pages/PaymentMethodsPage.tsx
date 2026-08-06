@@ -124,7 +124,7 @@ export default function PaymentMethodsPage() {
 
   return (
     <div>
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Métodos de Pago</h1>
           <p className="mt-1 text-sm text-gray-600">
@@ -133,7 +133,7 @@ export default function PaymentMethodsPage() {
         </div>
         <button
           onClick={() => setShowCreateForm(true)}
-          className="btn-primary flex items-center"
+          className="btn-primary flex items-center justify-center w-full sm:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           Nuevo Método de Pago

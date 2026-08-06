@@ -212,7 +212,7 @@ export default function ProductDetailPage() {
           type="button"
           onClick={handleDelete}
           disabled={deleteMutation.isPending}
-          className="inline-flex min-h-[44px] justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+          className="inline-flex min-h-[44px] w-full md:w-auto justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
         >
           <Trash2 className="h-4 w-4 mr-2 shrink-0" aria-hidden />
           Eliminar

@@ -126,10 +126,10 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex flex-col sm:flex-row sm:justify-end">
         <button
           onClick={() => navigate('/admin/expenses/create')}
-          className="btn-primary flex items-center"
+          className="btn-primary flex items-center justify-center w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Pago
@@ -358,26 +358,46 @@ export default function ExpensesPage() {
       </div>
 
       {rangeValid && totalPages > 1 && (
-        <div className="bg-white shadow rounded-lg px-6 py-4 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="btn-secondary disabled:opacity-50"
-          >
-            Anterior
-          </button>
-          <span className="text-sm text-gray-600">
-            Página {page + 1} de {totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page >= totalPages - 1}
-            className="btn-secondary disabled:opacity-50"
-          >
-            Siguiente
-          </button>
+        <div className="bg-white shadow rounded-lg px-4 py-3 sm:px-6">
+          <div className="flex justify-between gap-3 sm:hidden">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="btn-secondary flex-1 disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className="btn-secondary flex-1 disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </div>
+          <div className="hidden sm:flex sm:items-center sm:justify-between">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="btn-secondary disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            <span className="text-sm text-gray-600">
+              Página {page + 1} de {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className="btn-secondary disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -522,12 +522,12 @@ export default function EditSalePage() {
        <div className="bg-white shadow-sm border-b">
          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
            <div className="flex items-center justify-between h-16">
-             <div className="flex items-center">
+             <div className="flex items-center min-w-0 flex-1">
                <BackButton
                  fallback="/sales"
-                 className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 mr-3 min-h-0"
+                 className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 mr-3 min-h-0 shrink-0"
                />
-               <h1 className="text-xl font-semibold text-gray-900">Editar Venta #{sale.id}</h1>
+               <h1 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">Editar Venta #{sale.id}</h1>
              </div>
            </div>
          </div>
@@ -795,12 +795,12 @@ export default function EditSalePage() {
           </div>
 
                                 {/* Botón de actualizar */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={deleteMutation.isPending || updateMutation.isPending}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar venta'}
@@ -808,7 +808,7 @@ export default function EditSalePage() {
               <button
                 type="submit"
                 disabled={updateMutation.isPending || paymentTotalsMismatch || deleteMutation.isPending}
-                className="btn-primary flex items-center"
+                className="btn-primary flex items-center justify-center w-full sm:w-auto"
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 {updateMutation.isPending ? 'Actualizando...' : 'Actualizar Venta'}

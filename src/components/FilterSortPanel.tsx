@@ -77,13 +77,13 @@ export const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
         )}
 
         {/* Controls */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-shrink-0">
           {/* Filter Toggle */}
           {filterFields.length > 0 && (
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={cn(
-                "btn-secondary flex items-center text-sm",
+                "btn-secondary flex items-center justify-center text-sm w-full sm:w-auto",
                 activeFiltersCount > 0 && "bg-primary-50 text-primary-600 border-primary-300"
               )}
             >

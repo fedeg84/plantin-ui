@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { userApi } from '../api/endpoints';
 import { UpdateUserRequest } from '../types/api';
-import { Save, Trash2 } from 'lucide-react';
+import { Save } from 'lucide-react';
 import BackButton from '../components/BackButton';
 import { Link } from 'react-router-dom';
 import ProfileImageUpload from '../components/ProfileImageUpload';
@@ -58,14 +58,6 @@ const EditUserPage: React.FC = () => {
     },
   });
 
-  const deleteUserMutation = useMutation({
-    mutationFn: () => userApi.delete(userId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      navigate('/admin/users');
-    },
-  });
-
   const toggleActiveMutation = useMutation({
     mutationFn: (isActive: boolean) => {
       const data = getValues();
@@ -86,12 +78,6 @@ const EditUserPage: React.FC = () => {
       alert('Error al cambiar el estado del usuario: ' + (error.response?.data?.detail || error.message));
     },
   });
-
-  const handleDelete = () => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
-      deleteUserMutation.mutate();
-    }
-  };
 
   const handleToggleActive = () => {
     if (!user) return;
@@ -291,12 +277,12 @@ const EditUserPage: React.FC = () => {
               )}
             </div>
 
-            <div className="pt-2">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-6 border-t border-gray-200">
               <button
                 type="button"
                 onClick={handleToggleActive}
-                disabled={toggleActiveMutation.isPending || updateUserMutation.isPending || deleteUserMutation.isPending}
-                className={`inline-flex items-center px-4 py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+                disabled={toggleActiveMutation.isPending || updateUserMutation.isPending}
+                className={`inline-flex items-center justify-center px-4 py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto ${
                   user.is_active
                     ? 'bg-red-600 hover:bg-red-700'
                     : 'bg-green-600 hover:bg-green-700'
@@ -308,31 +294,18 @@ const EditUserPage: React.FC = () => {
                     ? 'Desactivar usuario'
                     : 'Activar usuario'}
               </button>
-            </div>
-
-            {/* Form Actions */}
-            <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleteUserMutation.isPending || updateUserMutation.isPending || toggleActiveMutation.isPending}
-                className="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                {deleteUserMutation.isPending ? 'Eliminando...' : 'Eliminar usuario'}
-              </button>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => navigate('/admin/users')}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || updateUserMutation.isPending || deleteUserMutation.isPending || toggleActiveMutation.isPending}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting || updateUserMutation.isPending || toggleActiveMutation.isPending}
+                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4" />
                   {isSubmitting || updateUserMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}

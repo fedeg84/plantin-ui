@@ -614,11 +614,11 @@ export default function CreateSalePage() {
           </div>
 
           {/* Botón Crear Venta */}
-          <div className="flex justify-end pt-4">
+          <div className="flex flex-col sm:flex-row sm:justify-end pt-4">
             <button
               type="submit"
               disabled={createMutation.isPending || paymentTotalsMismatch}
-              className="btn-primary flex items-center px-6 py-3 text-base"
+              className="btn-primary flex items-center justify-center px-6 py-3 text-base w-full sm:w-auto"
             >
               <ShoppingCart className="h-5 w-5 mr-2" />
               {createMutation.isPending ? 'Creando...' : 'Crear Venta'}

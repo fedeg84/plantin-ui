@@ -25,7 +25,7 @@ export default function SectionTabsLayout({ title, description, tabs }: SectionT
       </div>
 
       <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8 overflow-x-auto">
+        <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
           {tabs.map((tab) => {
             const active = tab.isActive(pathname);
             return (

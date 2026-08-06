@@ -70,10 +70,10 @@ export default function ProductsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex justify-end">
+      <div className="mb-6 flex flex-col sm:flex-row sm:justify-end">
         <button
           onClick={() => navigateWithReturn(navigate, location, '/products/create')}
-          className="btn-primary flex items-center"
+          className="btn-primary flex items-center justify-center w-full sm:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           Nuevo Producto

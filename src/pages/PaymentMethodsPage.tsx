@@ -127,9 +127,6 @@ export default function PaymentMethodsPage() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Métodos de Pago</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Configura los métodos de pago disponibles
-          </p>
         </div>
         <button
           onClick={() => setShowCreateForm(true)}

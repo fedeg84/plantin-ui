@@ -22,7 +22,6 @@ export default function ProductsSectionLayout() {
   return (
     <SectionTabsLayout
       title="Productos"
-      description="Gestioná el inventario y los tipos de producto"
       tabs={productTabs}
     />
   );

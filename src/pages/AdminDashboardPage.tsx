@@ -116,7 +116,6 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Historial de ventas</h1>
-          <p className="text-gray-600 mt-1">Consultá ventas por fecha, producto o vendedor</p>
         </div>
 
         <button

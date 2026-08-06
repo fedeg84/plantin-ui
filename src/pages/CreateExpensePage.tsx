@@ -99,9 +99,6 @@ export default function CreateExpensePage() {
           <BackButton fallback="/admin/payments" className="min-h-0" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Nuevo Pago</h1>
-            <p className="text-gray-600 mt-1">
-              Registra un nuevo pago o gasto
-            </p>
           </div>
         </div>
       </div>

@@ -129,9 +129,6 @@ export default function ProductTypeFormPage() {
           <h1 className="text-2xl font-bold text-gray-900">
             {isEditing ? 'Editar tipo de producto' : 'Nuevo tipo de producto'}
           </h1>
-          <p className="text-gray-600">
-            Los atributos se definen al crear o editar cada producto, no en el tipo.
-          </p>
         </div>
       </div>
 

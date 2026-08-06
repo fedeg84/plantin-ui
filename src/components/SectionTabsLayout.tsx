@@ -10,18 +10,16 @@ export interface SectionTab {
 
 interface SectionTabsLayoutProps {
   title: string;
-  description?: string;
   tabs: SectionTab[];
 }
 
-export default function SectionTabsLayout({ title, description, tabs }: SectionTabsLayoutProps) {
+export default function SectionTabsLayout({ title, tabs }: SectionTabsLayoutProps) {
   const { pathname } = useLocation();
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-        {description && <p className="mt-1 text-sm text-gray-600">{description}</p>}
       </div>
 
       <div className="border-b border-gray-200">

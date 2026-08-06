@@ -53,9 +53,6 @@ export default function SalesPage() {
       <div className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Ventas</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Administra las ventas de tu negocio
-          </p>
         </div>
         <button
           onClick={() => navigate('/sales/create')}

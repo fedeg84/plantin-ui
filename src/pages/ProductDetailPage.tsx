@@ -205,7 +205,6 @@ export default function ProductDetailPage() {
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
               {productName || product.name}
             </h1>
-            <p className="text-gray-600">Editá los datos del producto</p>
           </div>
         </div>
         <button

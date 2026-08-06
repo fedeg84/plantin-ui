@@ -124,7 +124,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
           <button
             type="button"
             onClick={handleUploadClick}
-            className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
+            className="absolute bottom-0 right-0 w-8 h-8 bg-primary-600 hover:bg-primary-700 rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
             title="Cambiar foto"
           >
             <Camera className="w-4 h-4" />
@@ -146,8 +146,8 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
 
       {/* Upload Status */}
       {uploadMutation.isPending && (
-        <div className="text-sm text-blue-600 flex items-center space-x-2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+        <div className="text-sm text-primary-600 flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
           <span>Subiendo imagen...</span>
         </div>
       )}

@@ -124,12 +124,11 @@ const ProfilePage: React.FC = () => {
     <div className="p-6">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <UserIcon className="h-6 w-6 text-blue-600" />
+          <div className="h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center">
+            <UserIcon className="h-6 w-6 text-primary-600" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Mi Perfil</h1>
-            <p className="text-gray-600 mt-1">Actualiza tu información personal</p>
           </div>
         </div>
 
@@ -210,10 +209,10 @@ const ProfilePage: React.FC = () => {
             {/* Current Info Display */}
             <div className="bg-gray-50 rounded-lg p-4">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Información Actual</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-500">Rol:</span>
-                  <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center">
+                  <span className="text-gray-500 shrink-0">Rol:</span>
+                  <span className={`inline-flex w-fit px-2 py-1 rounded-full text-xs font-medium ${
                     user.role === 'ADMIN' 
                       ? 'bg-purple-100 text-purple-800' 
                       : 'bg-green-100 text-green-800'
@@ -221,9 +220,9 @@ const ProfilePage: React.FC = () => {
                     {user.role === 'ADMIN' ? 'Administrador' : 'Usuario'}
                   </span>
                 </div>
-                <div>
-                  <span className="text-gray-500">Estado:</span>
-                  <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center">
+                  <span className="text-gray-500 shrink-0">Estado:</span>
+                  <span className={`inline-flex w-fit px-2 py-1 rounded-full text-xs font-medium ${
                     user.is_active 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
@@ -246,7 +245,7 @@ const ProfilePage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting || updateUserMutation.isPending}
-                className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save className="w-4 h-4" />
                 {isSubmitting || updateUserMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}

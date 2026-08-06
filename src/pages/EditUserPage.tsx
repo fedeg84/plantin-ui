@@ -184,7 +184,6 @@ const EditUserPage: React.FC = () => {
           <BackButton fallback="/admin/users" className="min-h-0" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Editar Usuario</h1>
-            <p className="text-gray-600 mt-1">Modifica la información del usuario</p>
           </div>
         </div>
 
@@ -305,7 +304,7 @@ const EditUserPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || updateUserMutation.isPending || toggleActiveMutation.isPending}
-                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4" />
                   {isSubmitting || updateUserMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}

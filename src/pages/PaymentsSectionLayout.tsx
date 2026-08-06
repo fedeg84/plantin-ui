@@ -23,7 +23,6 @@ export default function PaymentsSectionLayout() {
   return (
     <SectionTabsLayout
       title="Pagos"
-      description="Administrá pagos y tipos de pago"
       tabs={paymentTabs}
     />
   );

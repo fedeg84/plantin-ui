@@ -102,7 +102,6 @@ export default function CreateProductPage() {
         <BackButton fallback="/products" />
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Carga de stock</h1>
-          <p className="text-gray-600">Registrá un producto con tipo, atributos y stock inicial.</p>
         </div>
       </div>
 

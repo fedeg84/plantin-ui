@@ -11,20 +11,40 @@ import {
   ShoppingCart, 
   LogOut,
   Settings,
-  User,
   Clock,
   CreditCard,
   ChevronDown,
   ChevronRight,
   Users,
   DollarSign,
-  History
+  History,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 import UserAvatar from './UserAvatar';
 
 interface LayoutProps {
   children: React.ReactNode;
+}
+
+type NavItem = {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  isActive?: (pathname: string) => boolean;
+};
+
+type NavItemWithSubItems = {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  subItems: NavItem[];
+};
+
+type NavigationEntry = NavItem | NavItemWithSubItems;
+
+function hasSubItems(item: NavigationEntry): item is NavItemWithSubItems {
+  return 'subItems' in item;
 }
 
 export default function Layout({ children }: LayoutProps) {
@@ -57,13 +77,13 @@ export default function Layout({ children }: LayoutProps) {
     pathname.startsWith('/admin/expenses') ||
     pathname.startsWith('/admin/expense-types');
 
-  const navigation = [
+  const navigation: NavItem[] = [
     { name: 'Nueva Venta', href: '/sales/create', icon: Plus },
     { name: 'Ventas', href: '/sales', icon: ShoppingCart },
     { name: 'Productos', href: '/products', icon: Package, isActive: isProductsSection },
   ];
 
-  const adminSubItems = [
+  const adminSubItems: NavItem[] = [
     { name: 'Historial de ventas', href: '/admin/dashboard', icon: History },
     { name: 'Gestión de Usuarios', href: '/admin/users', icon: Users },
     { name: 'Métodos de Pago', href: '/payment-methods', icon: CreditCard },
@@ -71,7 +91,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'Turnos', href: '/admin/shifts', icon: Clock },
   ];
 
-  const adminNavigation = {
+  const adminNavigation: NavItemWithSubItems = {
     name: 'Panel de Admin',
     href: '/admin/dashboard',
     icon: Settings,
@@ -95,7 +115,7 @@ export default function Layout({ children }: LayoutProps) {
     setExpandedAdminMenu((prev) => !prev);
   };
 
-  const allNavigation = adminStatus ? [...navigation, adminNavigation] : navigation;
+  const allNavigation: NavigationEntry[] = adminStatus ? [...navigation, adminNavigation] : navigation;
 
   return (
     <div className="h-full flex">
@@ -133,7 +153,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             <nav className="mt-5 px-2 space-y-1">
               {allNavigation.map((item) => {
-                if (item.subItems && item.subItems.length > 0) {
+                if (hasSubItems(item)) {
                   // Admin menu with subitems
                   const isParentActive = location.pathname === item.href;
                   const isAnyChildActive = item.subItems.some((subItem) =>
@@ -248,7 +268,7 @@ export default function Layout({ children }: LayoutProps) {
               </div>
               <nav className="mt-5 flex-1 px-2 bg-white space-y-1">
                 {allNavigation.map((item) => {
-                  if (item.subItems && item.subItems.length > 0) {
+                  if (hasSubItems(item)) {
                     // Admin menu with subitems
                     const isParentActive = location.pathname === item.href;
                     const isAnyChildActive = item.subItems.some((subItem) =>

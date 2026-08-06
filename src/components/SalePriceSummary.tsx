@@ -1,7 +1,7 @@
 import { roundPeso, paymentMethodLineDiscountAmount } from '../utils/money';
 import type { Product } from '../types/api';
 
-type SaleItemRow = { product_id: number; quantity: number };
+type SaleItemRow = { product_id: number; quantity?: number };
 type PaymentRow = { payment_method_id: number; amount: number; discount?: number };
 
 type Props = {

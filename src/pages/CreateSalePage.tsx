@@ -440,7 +440,7 @@ export default function CreateSalePage() {
                         </span>
                       </div>
                       
-                      {watch(`sale_items.${index}.quantity`) > selectedProducts[index].current_stock && (
+                      {(watch(`sale_items.${index}.quantity`) || 0) > selectedProducts[index].current_stock && (
                         <div className="mt-2 flex items-center p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-md">
                           <Eye className="h-5 w-5 text-yellow-600 mr-2 flex-shrink-0" />
                           <div className="flex-1">

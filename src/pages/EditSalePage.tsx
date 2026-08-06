@@ -481,7 +481,7 @@ export default function EditSalePage() {
       items: filteredSaleItems.map((item) => {
         const row: { id?: number; product_id: number; quantity: number } = {
           product_id: item.product_id,
-          quantity: item.quantity,
+          quantity: item.quantity ?? 0,
         };
         if (item.id != null) row.id = item.id;
         return row;

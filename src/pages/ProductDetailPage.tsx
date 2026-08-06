@@ -15,7 +15,7 @@ import type { UpdateProductRequest } from '../types/api';
 import toast from 'react-hot-toast';
 import BackButton from '../components/BackButton';
 import MoneyInput from '../components/MoneyInput';
-import { formatDateLocal, formatDateTimeLocal } from '../utils/datetime';
+import { formatDateTimeLocal } from '../utils/datetime';
 import ProductTypeSelector from '../components/ProductTypeSelector';
 import ProductAttributesEditor, {
   ProductAttributeFormRow,

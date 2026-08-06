@@ -39,30 +39,6 @@ const getUserColor = (userId: number): { bg: string; border: string; text: strin
 };
 
 export default function WeeklyShiftsCalendar({ shifts, onShiftClick, selectedUserIds = [], onToggleUser }: WeeklyShiftsCalendarProps) {
-  // Group shifts by day
-  const shiftsByDay = useMemo(() => {
-    const grouped: Record<DayOfWeek, Shift[]> = {
-      monday: [],
-      tuesday: [],
-      wednesday: [],
-      thursday: [],
-      friday: [],
-      saturday: [],
-      sunday: [],
-    };
-
-    shifts.forEach((shift) => {
-      grouped[shift.day_of_week].push(shift);
-    });
-
-    // Sort shifts within each day by start_time
-    Object.keys(grouped).forEach((day) => {
-      grouped[day as DayOfWeek].sort((a, b) => a.start_time.localeCompare(b.start_time));
-    });
-
-    return grouped;
-  }, [shifts]);
-
   // Get unique users for legend
   const users = useMemo(() => {
     const uniqueUsers = new Map<number, { id: number; username: string }>();

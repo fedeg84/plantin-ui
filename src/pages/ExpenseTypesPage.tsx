@@ -236,7 +236,7 @@ export default function ExpenseTypesPage() {
               className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
               onClick={() => {
                 setShowCreateForm(false);
-                setCreateParentId(null);
+                createForm.reset({ parent_id: '' });
               }}
             />
 
@@ -249,7 +249,7 @@ export default function ExpenseTypesPage() {
                       type="button"
                       onClick={() => {
                         setShowCreateForm(false);
-                        setCreateParentId(null);
+                        createForm.reset({ parent_id: '' });
                       }}
                       className="text-gray-400 hover:text-gray-600"
                     >
@@ -301,7 +301,7 @@ export default function ExpenseTypesPage() {
                     type="button"
                     onClick={() => {
                       setShowCreateForm(false);
-                      setCreateParentId(null);
+                      createForm.reset({ parent_id: '' });
                     }}
                     className="btn-secondary sm:w-auto w-full mt-3 sm:mt-0"
                   >

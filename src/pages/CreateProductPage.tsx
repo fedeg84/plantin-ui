@@ -64,7 +64,6 @@ export default function CreateProductPage() {
   const handleTypeSelection = (selection: ProductTypePickerSelection) => {
     setTypeSelection(selection);
     if (selection.status === 'type') {
-      setValue('name', selection.productType.name);
       setValue('type_id', selection.productType.id);
     } else if (selection.status === 'none') {
       setValue('type_id', undefined);

@@ -50,13 +50,11 @@ export default function SalesPage() {
 
   return (
     <div>
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ventas</h1>
-        </div>
+      <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="page-title">Ventas</h1>
         <button
           onClick={() => navigate('/sales/create')}
-          className="btn-primary flex items-center"
+          className="btn-primary w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
           Crear Venta
@@ -115,7 +113,7 @@ export default function SalesPage() {
         onFiltersChange={setFilters}
       />
 
-      <div className="hidden md:block bg-white shadow rounded-lg">
+      <div className="hidden md:block card">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -236,12 +234,12 @@ export default function SalesPage() {
 
       <div className="md:hidden space-y-4">
         {isLoading ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+          <div className="card p-4 text-center text-gray-500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
             <p className="mt-2">Cargando ventas...</p>
           </div>
         ) : sales?.items.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center">
+          <div className="card p-4 text-center">
             <ShoppingCart className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Sin ventas</h3>
             <p className="mt-1 text-sm text-gray-500">
@@ -252,7 +250,7 @@ export default function SalesPage() {
           sales?.items.map((sale) => (
             <div
               key={sale.id}
-              className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
+              className="card p-4 cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => openSale(sale.id)}
             >
               <div className="flex items-start justify-between">

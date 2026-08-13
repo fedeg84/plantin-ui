@@ -130,11 +130,11 @@ const ProfilePage: React.FC = () => {
             <UserIcon className="h-6 w-6 text-primary-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Mi Perfil</h1>
+            <h1 className="page-title">Mi Perfil</h1>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="card p-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Profile Image */}
             <div>

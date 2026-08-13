@@ -546,7 +546,7 @@ export default function EditSalePage() {
        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
          <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
           {/* Productos */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Productos</h2>
             </div>
@@ -657,7 +657,7 @@ export default function EditSalePage() {
           </div>
 
           {/* Métodos de Pago */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Métodos de Pago</h2>
             </div>
@@ -771,7 +771,7 @@ export default function EditSalePage() {
           </div>
 
           {/* Resumen de Precios */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center">
                 <Calculator className="h-5 w-5 mr-2 text-gray-400" />
@@ -789,7 +789,7 @@ export default function EditSalePage() {
           </div>
 
           {/* Descripción */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Descripción (Opcional)</h2>
             </div>

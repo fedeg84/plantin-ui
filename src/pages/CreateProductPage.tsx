@@ -100,7 +100,7 @@ export default function CreateProductPage() {
       <div className="flex items-center space-x-4">
         <BackButton fallback="/products" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Carga de stock</h1>
+          <h1 className="page-title">Carga de stock</h1>
         </div>
       </div>
 
@@ -112,7 +112,7 @@ export default function CreateProductPage() {
 
       {typeSelection.status !== 'unset' && (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6 space-y-4">
+          <div className="card p-4 sm:p-6 space-y-4">
             <h2 className="text-lg font-medium text-gray-900">Paso 2: Datos del producto</h2>
 
             <div>
@@ -156,7 +156,7 @@ export default function CreateProductPage() {
             </div>
           </div>
 
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+          <div className="card p-4 sm:p-6">
             <ProductAttributesEditor value={attributeRows} onChange={setAttributeRows} />
           </div>
 

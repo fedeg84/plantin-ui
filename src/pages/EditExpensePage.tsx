@@ -139,13 +139,13 @@ export default function EditExpensePage() {
         <div className="flex items-center space-x-4">
           <BackButton fallback="/admin/payments" className="min-h-0" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Editar Pago #{expense.id}</h1>
+            <h1 className="page-title">Editar Pago #{expense.id}</h1>
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <div className="bg-white shadow rounded-lg">
+      <div className="card">
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           {/* Description */}
           <div>

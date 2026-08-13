@@ -351,13 +351,13 @@ export default function CreateSalePage() {
       {/* Page Header */}
       <div className="mb-6 flex items-center">
         <BackButton fallback="/sales" className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 mr-3 min-h-0" />
-        <h1 className="text-2xl font-bold text-gray-900">Nueva Venta</h1>
+        <h1 className="page-title">Nueva Venta</h1>
       </div>
 
       <div className="space-y-6">
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
           {/* Productos */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Productos</h2>
             </div>
@@ -467,7 +467,7 @@ export default function CreateSalePage() {
           </div>
 
           {/* Métodos de Pago */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Métodos de Pago</h2>
             </div>
@@ -581,7 +581,7 @@ export default function CreateSalePage() {
           </div>
 
           {/* Resumen de Precios */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center">
                 <Calculator className="h-5 w-5 mr-2 text-gray-400" />
@@ -599,7 +599,7 @@ export default function CreateSalePage() {
           </div>
 
           {/* Descripción */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Descripción (Opcional)</h2>
             </div>

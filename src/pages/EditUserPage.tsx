@@ -192,11 +192,11 @@ const EditUserPage: React.FC = () => {
         <div className="flex items-center gap-4 mb-6">
           <BackButton fallback="/admin/users" className="min-h-0" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Editar Usuario</h1>
+            <h1 className="page-title">Editar Usuario</h1>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="card p-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Profile Image */}
             <div>

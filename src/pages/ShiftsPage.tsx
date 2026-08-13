@@ -229,11 +229,11 @@ export default function ShiftsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Turnos de Trabajo</h1>
+        <h1 className="page-title">Turnos de Trabajo</h1>
       </div>
 
       {/* Weekly Calendar */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="card p-6">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>

@@ -210,7 +210,7 @@ export default function ProductDetailPage() {
         <div className="min-w-0 flex-1 space-y-3">
           <BackButton fallback="/products" />
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
+            <h1 className="page-title break-words">
               {productName || product.name}
             </h1>
           </div>
@@ -228,7 +228,7 @@ export default function ProductDetailPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6 space-y-4">
+          <div className="card p-4 sm:p-6 space-y-4">
             <h2 className="text-lg font-medium text-gray-900">Información del producto</h2>
 
             <div>
@@ -268,7 +268,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6 space-y-4">
+          <div className="card p-4 sm:p-6 space-y-4">
             <h2 className="text-lg font-medium text-gray-900">Precio y stock</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -299,7 +299,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6 space-y-4">
+          <div className="card p-4 sm:p-6 space-y-4">
             <h2 className="text-lg font-medium text-gray-900">Tipo de producto</h2>
             <div>
               <label className="label">Tipo</label>
@@ -314,7 +314,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+          <div className="card p-4 sm:p-6">
             <ProductAttributesEditor value={attributeRows} onChange={setAttributeRows} />
           </div>
 
@@ -328,7 +328,7 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+          <div className="card p-4 sm:p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Información del sistema</h2>
             <dl className="space-y-4">
               <div>

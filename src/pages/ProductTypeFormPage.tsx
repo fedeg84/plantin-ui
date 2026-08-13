@@ -132,13 +132,13 @@ export default function ProductTypeFormPage() {
       <div className="flex items-center space-x-4">
         <BackButton fallback={fallback} />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="page-title">
             {isEditing ? 'Editar tipo de producto' : 'Nuevo tipo de producto'}
           </h1>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="card p-6 space-y-6">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">

@@ -125,32 +125,32 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Historial de ventas</h1>
+        <h1 className="page-title">Historial de ventas</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="card p-5 sm:p-6">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <DollarSign className="h-8 w-8 text-green-600" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-50">
+              <DollarSign className="h-6 w-6 text-primary-700" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Recaudación</p>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-sm font-medium text-stone-500">Recaudación</p>
+              <p className="text-2xl font-semibold tracking-tight text-stone-900">
                 {!rangeValid ? '—' : isLoadingStats ? '...' : formatCurrency(totalRevenue)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="card p-5 sm:p-6">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <ShoppingCart className="h-8 w-8 text-blue-600" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-50">
+              <ShoppingCart className="h-6 w-6 text-sky-700" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Ventas realizadas</p>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-sm font-medium text-stone-500">Ventas realizadas</p>
+              <p className="text-2xl font-semibold tracking-tight text-stone-900">
                 {!rangeValid ? '—' : isLoadingStats ? '...' : totalSalesCount}
               </p>
             </div>
@@ -226,7 +226,7 @@ export default function AdminDashboardPage() {
         onFiltersChange={handleFiltersChange}
       />
 
-      <div className="bg-white shadow rounded-lg">
+      <div className="card">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">Ventas</h2>
           {appliedDateFilterLabel && (

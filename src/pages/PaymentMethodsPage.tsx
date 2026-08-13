@@ -126,7 +126,7 @@ export default function PaymentMethodsPage() {
     <div>
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Métodos de Pago</h1>
+          <h1 className="page-title">Métodos de Pago</h1>
         </div>
         <button
           onClick={() => setShowCreateForm(true)}
@@ -226,7 +226,7 @@ export default function PaymentMethodsPage() {
       />
 
       {/* Payment Methods List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="card overflow-hidden">
         <div className="px-4 py-5 sm:p-6">
           {isLoading ? (
             <div className="text-center">

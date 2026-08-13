@@ -399,7 +399,7 @@ export default function ExpenseTypesPage() {
         onFiltersChange={setFilters}
       />
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
+      <div className="card overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>

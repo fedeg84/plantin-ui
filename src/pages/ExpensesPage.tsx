@@ -156,14 +156,14 @@ export default function ExpensesPage() {
         }}
       />
 
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="card p-5 sm:p-6">
         <div className="flex items-center">
-          <div className="flex-shrink-0">
-            <DollarSign className="h-8 w-8 text-red-600" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-50">
+            <DollarSign className="h-6 w-6 text-red-600" />
           </div>
           <div className="ml-4">
-            <p className="text-sm font-medium text-gray-500">Total gastos</p>
-            <p className="text-2xl font-semibold text-gray-900">
+            <p className="text-sm font-medium text-stone-500">Total gastos</p>
+            <p className="text-2xl font-semibold tracking-tight text-stone-900">
               {!rangeValid ? '—' : isLoadingStats ? '...' : formatCurrency(totalExpensesAmount)}
             </p>
           </div>
@@ -216,7 +216,7 @@ export default function ExpensesPage() {
         onFiltersChange={handleFiltersChange}
       />
 
-      <div className="hidden md:block bg-white shadow rounded-lg">
+      <div className="hidden md:block card">
         {!rangeValid ? (
           <div className="p-8 text-center">
             <p className="text-sm text-red-600">{emptyStateMessage}</p>
@@ -312,16 +312,16 @@ export default function ExpensesPage() {
 
       <div className="md:hidden space-y-4">
         {!rangeValid ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center text-red-600 text-sm">
+          <div className="card p-4 text-center text-red-600 text-sm">
             {emptyStateMessage}
           </div>
         ) : isLoadingList ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+          <div className="card p-4 text-center text-gray-500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
             <p className="mt-2">Cargando pagos...</p>
           </div>
         ) : expenses.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center">
+          <div className="card p-4 text-center">
             <DollarSign className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Sin pagos</h3>
             <p className="mt-1 text-sm text-gray-500">{emptyStateMessage}</p>
@@ -330,7 +330,7 @@ export default function ExpensesPage() {
           expenses.map((expense) => (
             <div
               key={expense.id}
-              className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
+              className="card p-4 cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => openExpense(expense.id)}
             >
               <div className="flex-1">
@@ -358,7 +358,7 @@ export default function ExpensesPage() {
       </div>
 
       {rangeValid && totalPages > 1 && (
-        <div className="bg-white shadow rounded-lg px-4 py-3 sm:px-6">
+        <div className="card px-4 py-3 sm:px-6">
           <div className="flex justify-between gap-3 sm:hidden">
             <button
               type="button"

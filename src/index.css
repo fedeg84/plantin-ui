@@ -5,31 +5,44 @@
 @layer base {
   html {
     @apply h-full;
+    -webkit-tap-highlight-color: transparent;
   }
-  
+
   body {
-    @apply h-full bg-gray-50 text-gray-900 antialiased;
+    @apply h-full bg-stone-50 text-stone-900 antialiased font-sans;
   }
-  
+
   #root {
     @apply h-full;
+  }
+
+  ::selection {
+    @apply bg-primary-100 text-primary-900;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 focus:ring-primary-500 focus:ring-offset-2 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2;
+    @apply inline-flex items-center justify-center min-h-[44px] rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 active:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation;
   }
-  
+
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 focus:ring-gray-500 focus:ring-offset-2 text-gray-900 font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2;
+    @apply inline-flex items-center justify-center min-h-[44px] rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 shadow-sm transition-colors hover:bg-stone-50 active:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation;
   }
-  
+
   .input {
-    @apply block w-full min-h-[2.75rem] rounded-md border-gray-300 px-3 py-2 text-base shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
+    @apply block w-full min-h-[2.75rem] rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-base text-stone-900 shadow-sm placeholder:text-stone-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 sm:text-sm;
   }
-  
+
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply mb-1.5 block text-sm font-medium text-stone-700;
   }
-} 
+
+  .card {
+    @apply rounded-2xl border border-stone-200/80 bg-white shadow-sm;
+  }
+
+  .page-title {
+    @apply text-2xl font-semibold tracking-tight text-stone-900;
+  }
+}

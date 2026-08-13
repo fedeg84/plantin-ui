@@ -102,7 +102,7 @@ const UsersPage: React.FC = () => {
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
+          <h1 className="page-title">Gestión de Usuarios</h1>
         </div>
         <Link
           to="/admin/users/create"
@@ -127,7 +127,7 @@ const UsersPage: React.FC = () => {
       </div>
 
       {/* Desktop Table - Hidden on mobile */}
-      <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+      <div className="hidden md:block card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -275,18 +275,18 @@ const UsersPage: React.FC = () => {
       {/* Mobile Cards - Hidden on desktop */}
       <div className="md:hidden space-y-4">
         {isLoading ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+          <div className="card p-4 text-center text-gray-500">
             Cargando usuarios...
           </div>
         ) : usersData?.items.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+          <div className="card p-4 text-center text-gray-500">
             No se encontraron usuarios
           </div>
         ) : (
           usersData?.items.map((user: User) => (
             <div
               key={user.id}
-              className={`bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow ${!user.is_active ? 'opacity-50' : ''}`}
+              className={`card p-4 cursor-pointer hover:shadow-md transition-shadow ${!user.is_active ? 'opacity-50' : ''}`}
               onClick={() => openUser(user.id)}
             >
               <div className="flex items-center space-x-3">
@@ -329,7 +329,7 @@ const UsersPage: React.FC = () => {
 
         {/* Mobile Pagination */}
         {usersData && usersData.pagination.total_pages > 1 && (
-          <div className="bg-white rounded-lg shadow p-4">
+          <div className="card p-4">
             <div className="flex items-center justify-between">
               <button
                 onClick={() => handlePageChange(searchParams.page! - 1)}

@@ -98,13 +98,13 @@ export default function CreateExpensePage() {
         <div className="flex items-center space-x-4">
           <BackButton fallback="/admin/payments" className="min-h-0" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Nuevo Pago</h1>
+            <h1 className="page-title">Nuevo Pago</h1>
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <div className="bg-white shadow rounded-lg">
+      <div className="card">
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           {/* Expense Type */}
           <div>

@@ -54,21 +54,21 @@ export default function HomePage() {
   const displayName = user?.name || currentUser?.username || '';
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div className="flex items-center gap-4">
         <UserAvatar
           pictureId={user?.picture_id}
           username={user?.username || currentUser?.username || ''}
           size="large"
-          className="w-20 h-20"
+          className="w-16 h-16 sm:w-20 sm:h-20"
         />
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="page-title">
           Bienvenido, {displayName}!
         </h1>
       </div>
 
-      <section className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <section className="card p-4 sm:p-6">
+        <h2 className="text-lg font-semibold text-stone-900 mb-4">
           Cronograma de la semana
         </h2>
         {shiftsLoading ? (
@@ -81,10 +81,10 @@ export default function HomePage() {
         )}
       </section>
 
-      <section className="bg-white shadow rounded-lg p-6">
+      <section className="card p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle className="h-5 w-5 text-amber-500" />
-          <h2 className="text-lg font-semibold text-gray-900">Producto a reponer</h2>
+          <h2 className="text-lg font-semibold text-stone-900">Producto a reponer</h2>
         </div>
 
         {restockLoading ? (

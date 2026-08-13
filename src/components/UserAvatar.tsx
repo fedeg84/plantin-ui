@@ -58,7 +58,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   };
 
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center overflow-hidden ${className}`}>
+    <div className={`${sizeClasses[size]} rounded-full bg-primary-50 border-2 border-primary-100 flex items-center justify-center overflow-hidden ${className}`}>
       {imageUrl && !imageError ? (
         <img
           src={imageUrl}
@@ -67,7 +67,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
           onError={handleImageError}
         />
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+        <div className="w-full h-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
           {username ? (
             <span className={`text-white font-semibold ${size === 'small' ? 'text-xs' : size === 'medium' ? 'text-sm' : 'text-lg'}`}>
               {getInitials(username)}

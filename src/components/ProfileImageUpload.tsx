@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { fileApi } from '../api/endpoints';
+import toast from 'react-hot-toast';
+import { getApiErrorMessage } from '../utils/apiErrors';
 import { X, User, Camera } from 'lucide-react';
 
 interface ProfileImageUploadProps {
@@ -45,9 +47,9 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
       onImageChange(response.id);
       setCurrentImageUrl(null); // Clear current image when new one is uploaded
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error uploading file:', error);
-      alert('Error al subir la imagen: ' + (error.response?.data?.detail || error.message));
+      toast.error(getApiErrorMessage(error, 'Error al subir la imagen'));
       setPreviewUrl(null);
     },
   });
@@ -58,13 +60,12 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona un archivo de imagen válido');
+      toast.error('Por favor selecciona un archivo de imagen válido');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('La imagen no puede ser mayor a 5MB');
+      toast.error('La imagen no puede ser mayor a 5MB');
       return;
     }
 

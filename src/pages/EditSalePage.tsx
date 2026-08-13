@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { saleApi } from '../api/endpoints';
 import { ShoppingCart, Trash2, Calculator, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '../hooks/useConfirm';
 import BackButton from '../components/BackButton';
 import MoneyInput from '../components/MoneyInput';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
@@ -88,6 +89,7 @@ export default function EditSalePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const saleId = parseInt(id!);
   const [selectedProducts, setSelectedProducts] = useState<{[key: number]: Product}>({});
   const originalSaleItemsRef = useRef<Map<number, OriginalSaleItem>>(new Map());
@@ -130,8 +132,13 @@ export default function EditSalePage() {
     },
   });
 
-  const handleDelete = () => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta venta? Esta acción no se puede deshacer.')) {
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: 'Eliminar venta',
+      message: '¿Estás seguro de que quieres eliminar esta venta? Esta acción no se puede deshacer.',
+      confirmLabel: 'Eliminar',
+    });
+    if (confirmed) {
       deleteMutation.mutate();
     }
   };
@@ -539,7 +546,7 @@ export default function EditSalePage() {
        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
          <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
           {/* Productos */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Productos</h2>
             </div>
@@ -650,7 +657,7 @@ export default function EditSalePage() {
           </div>
 
           {/* Métodos de Pago */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Métodos de Pago</h2>
             </div>
@@ -764,7 +771,7 @@ export default function EditSalePage() {
           </div>
 
           {/* Resumen de Precios */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center">
                 <Calculator className="h-5 w-5 mr-2 text-gray-400" />
@@ -782,7 +789,7 @@ export default function EditSalePage() {
           </div>
 
           {/* Descripción */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">Descripción (Opcional)</h2>
             </div>
@@ -819,6 +826,7 @@ export default function EditSalePage() {
             </div>
          </form>
        </div>
+       {ConfirmDialog}
      </div>
    );
  }

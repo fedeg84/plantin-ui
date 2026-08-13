@@ -103,7 +103,7 @@ export const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
 
       {/* Filters Panel */}
       {showFilters && (filterFields.length > 0 || extraFilterContent) && (
-        <div className="bg-gray-50 p-4 rounded-lg border">
+        <div className="card p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-900">Filtros</h3>
             {activeFiltersCount > 0 && (

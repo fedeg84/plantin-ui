@@ -9,6 +9,8 @@ import { UpdateUserRequest } from '../types/api';
 import { Save, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import ProfileImageUpload from '../components/ProfileImageUpload';
+import toast from 'react-hot-toast';
+import { getApiErrorMessage } from '../utils/apiErrors';
 
 const profileSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -49,11 +51,11 @@ const ProfilePage: React.FC = () => {
       // Invalidate the users list cache and specific user cache
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['user', userId] });
-      alert('Perfil actualizado correctamente');
+      toast.success('Perfil actualizado correctamente');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error updating profile:', error);
-      alert('Error al actualizar el perfil: ' + (error.response?.data?.detail || error.message));
+      toast.error(getApiErrorMessage(error, 'Error al actualizar el perfil'));
     },
   });
 
@@ -128,11 +130,11 @@ const ProfilePage: React.FC = () => {
             <UserIcon className="h-6 w-6 text-primary-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Mi Perfil</h1>
+            <h1 className="page-title">Mi Perfil</h1>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="card p-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Profile Image */}
             <div>

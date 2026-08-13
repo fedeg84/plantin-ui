@@ -8,6 +8,8 @@ import { userApi } from '../api/endpoints';
 import { CreateUserRequest } from '../types/api';
 import { Save } from 'lucide-react';
 import BackButton from '../components/BackButton';
+import toast from 'react-hot-toast';
+import { getApiErrorMessage } from '../utils/apiErrors';
 import ProfileImageUpload from '../components/ProfileImageUpload';
 
 const createUserSchema = z.object({
@@ -42,9 +44,9 @@ const CreateUserPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       navigate('/admin/users');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error creating user:', error);
-      alert('Error al crear el usuario: ' + (error.response?.data?.detail || error.message));
+      toast.error(getApiErrorMessage(error, 'Error al crear el usuario'));
     },
   });
 
@@ -97,11 +99,11 @@ const CreateUserPage: React.FC = () => {
         <div className="flex items-center gap-4 mb-6">
           <BackButton fallback="/admin/users" className="min-h-0" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Crear Nuevo Usuario</h1>
+            <h1 className="page-title">Crear Nuevo Usuario</h1>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="card p-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Profile Image */}
             <div>

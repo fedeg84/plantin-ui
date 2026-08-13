@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { extractUserFromToken } from '../utils/jwt';
+import { queryClient } from '../queryClient';
 
 interface User {
   id: number;
@@ -22,8 +23,14 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       token: null,
       isAuthenticated: false,
-      login: (token: string) => set({ token, isAuthenticated: true }),
-      logout: () => set({ token: null, isAuthenticated: false }),
+      login: (token: string) => {
+        queryClient.clear();
+        set({ token, isAuthenticated: true });
+      },
+      logout: () => {
+        queryClient.clear();
+        set({ token: null, isAuthenticated: false });
+      },
       getUser: () => {
         const state = get();
         if (!state.token) return null;

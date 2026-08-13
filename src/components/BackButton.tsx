@@ -26,7 +26,7 @@ export default function BackButton({
       aria-label={label || 'Volver'}
       title={label || 'Volver'}
       className={cn(
-        'inline-flex min-h-[44px] items-center text-gray-600 hover:text-gray-900',
+        'inline-flex min-h-[44px] items-center rounded-xl px-1 text-stone-600 hover:text-stone-900 touch-manipulation',
         className
       )}
     >

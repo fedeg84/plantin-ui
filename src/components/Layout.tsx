@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useQuery } from '@tanstack/react-query';
 import { userApi } from '../api/endpoints';
-import { 
-  Menu, 
-  X, 
+import {
+  Menu,
+  X,
   Home,
-  Plus, 
-  Package, 
-  ShoppingCart, 
+  Plus,
+  Package,
+  ShoppingCart,
   LogOut,
   Settings,
   Clock,
@@ -19,6 +19,8 @@ import {
   Users,
   DollarSign,
   History,
+  Sprout,
+  User,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
@@ -48,6 +50,33 @@ function hasSubItems(item: NavigationEntry): item is NavItemWithSubItems {
   return 'subItems' in item;
 }
 
+function BrandMark({ onClick }: { onClick?: () => void }) {
+  return (
+    <Link
+      to="/home"
+      onClick={onClick}
+      className="flex items-center gap-2.5 min-w-0"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white shadow-sm">
+        <Sprout className="h-5 w-5" />
+      </span>
+      <span className="truncate text-xl font-semibold tracking-tight text-stone-900">
+        Plantin
+      </span>
+    </Link>
+  );
+}
+
+function navItemClass(active: boolean, size: 'mobile' | 'desktop') {
+  return cn(
+    'group flex items-center rounded-xl font-medium transition-colors touch-manipulation',
+    size === 'mobile' ? 'px-3 py-2.5 text-base min-h-[44px]' : 'px-3 py-2 text-sm',
+    active
+      ? 'bg-primary-50 text-primary-800'
+      : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+  );
+}
+
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
@@ -58,7 +87,6 @@ export default function Layout({ children }: LayoutProps) {
   const currentUser = getUser();
   const userId = currentUser?.id;
 
-  // Get current user details for avatar
   const { data: user } = useQuery({
     queryKey: ['user', userId],
     queryFn: () => userApi.getById(userId!),
@@ -66,6 +94,33 @@ export default function Layout({ children }: LayoutProps) {
   });
 
   const [expandedAdminMenu, setExpandedAdminMenu] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const displayName = user?.name || currentUser?.username || '';
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!userMenuRef.current?.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setUserMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [userMenuOpen]);
+
+  useEffect(() => {
+    setUserMenuOpen(false);
+  }, [location.pathname]);
 
   const isProductsSection = (pathname: string) =>
     pathname === '/products' ||
@@ -106,8 +161,7 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   const adminStatus = isAdmin();
-  
-  // Expand admin submenu when entering an admin route
+
   useEffect(() => {
     const isAdminPage =
       location.pathname.startsWith('/admin') || location.pathname === '/payment-methods';
@@ -122,309 +176,251 @@ export default function Layout({ children }: LayoutProps) {
     setExpandedAdminMenu((prev) => !prev);
   };
 
+  const closeSidebar = () => setSidebarOpen(false);
+
   const allNavigation: NavigationEntry[] = adminStatus ? [...navigation, adminNavigation] : navigation;
 
-  return (
-    <div className="h-full flex">
-      {/* Mobile sidebar */}
-      <div className={cn(
-        'fixed inset-0 flex z-40 md:hidden',
-        sidebarOpen ? '' : 'pointer-events-none'
-      )}>
-        <div className={cn(
-          'fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity',
-          sidebarOpen ? 'opacity-100' : 'opacity-0'
-        )} onClick={() => setSidebarOpen(false)} />
-        
-        <div className={cn(
-          'relative flex-1 flex flex-col max-w-xs w-full bg-white transition transform',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        )}>
-          {sidebarOpen && (
-            <div className="absolute top-0 right-0 -mr-12 pt-2">
+  const isItemActive = (item: NavItem) =>
+    item.isActive ? item.isActive(location.pathname) : location.pathname === item.href;
+
+  const renderNav = (size: 'mobile' | 'desktop') =>
+    allNavigation.map((item) => {
+      if (hasSubItems(item)) {
+        const isParentActive = location.pathname === item.href;
+        const isAnyChildActive = item.subItems.some((subItem) =>
+          subItem.isActive
+            ? subItem.isActive(location.pathname)
+            : location.pathname === subItem.href ||
+              location.pathname.startsWith(`${subItem.href}/`)
+        );
+        const isExpanded = expandedAdminMenu;
+
+        return (
+          <div key={item.name}>
+            <div className={cn(navItemClass(isParentActive || isAnyChildActive, size), 'justify-between')}>
+              <div
+                onClick={() => {
+                  navigate(item.href);
+                  closeSidebar();
+                }}
+                className="flex flex-1 items-center cursor-pointer min-w-0"
+              >
+                <item.icon className={cn('shrink-0', size === 'mobile' ? 'mr-4 h-6 w-6' : 'mr-3 h-5 w-5')} />
+                {item.name}
+              </div>
               <button
                 type="button"
-                className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-                onClick={() => setSidebarOpen(false)}
+                onClick={toggleAdminMenu}
+                className="ml-2 p-1 rounded-lg hover:bg-black/5 shrink-0"
+                aria-label={isExpanded ? 'Contraer menú de admin' : 'Expandir menú de admin'}
               >
-                <X className="h-6 w-6 text-white" />
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
               </button>
             </div>
-          )}
-          
-          <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-            <div className="flex-shrink-0 flex items-center px-4">
-              <Link
-                to="/home"
-                onClick={() => setSidebarOpen(false)}
-                className="text-2xl font-bold text-primary-600 hover:text-primary-700 cursor-pointer"
-              >
-                Plantin
-              </Link>
-            </div>
-            <nav className="mt-5 px-2 space-y-1">
-              {allNavigation.map((item) => {
-                if (hasSubItems(item)) {
-                  // Admin menu with subitems
-                  const isParentActive = location.pathname === item.href;
-                  const isAnyChildActive = item.subItems.some((subItem) =>
-                    subItem.isActive
-                      ? subItem.isActive(location.pathname)
-                      : location.pathname === subItem.href ||
-                        location.pathname.startsWith(`${subItem.href}/`)
-                  );
-                  const isExpanded = expandedAdminMenu;
-                  
-                  return (
-                    <div key={item.name}>
-                      <div
-                        className={cn(
-                          'group flex items-center justify-between px-2 py-2 text-base font-medium rounded-md',
-                          (isParentActive || isAnyChildActive)
-                            ? 'bg-primary-100 text-primary-900'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        )}
-                      >
-                        <div
-                          onClick={() => {
-                            navigate(item.href);
-                            setSidebarOpen(false);
-                          }}
-                          className="flex flex-1 items-center cursor-pointer min-w-0"
-                        >
-                          <item.icon className="mr-4 h-6 w-6 shrink-0" />
-                          {item.name}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            toggleAdminMenu(e);
-                          }}
-                          className="ml-2 p-1 rounded hover:bg-black/5 shrink-0"
-                          aria-label={isExpanded ? 'Contraer menú de admin' : 'Expandir menú de admin'}
-                        >
-                          {isExpanded ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                      {isExpanded && (
-                        <div className="ml-4 mt-1 space-y-1">
-                          {item.subItems.map((subItem) => {
-                            const isSubActive = subItem.isActive
-                              ? subItem.isActive(location.pathname)
-                              : location.pathname === subItem.href ||
-                                location.pathname.startsWith(`${subItem.href}/`);
-                            return (
-                              <Link
-                                key={subItem.name}
-                                to={subItem.href}
-                                onClick={() => setSidebarOpen(false)}
-                                className={cn(
-                                  'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
-                                  isSubActive
-                                    ? 'bg-primary-100 text-primary-900'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                )}
-                              >
-                                <subItem.icon className="mr-3 h-5 w-5" />
-                                {subItem.name}
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                } else {
-                  // Regular menu item
-                  const isActive = item.isActive
-                    ? item.isActive(location.pathname)
-                    : location.pathname === item.href;
+            {isExpanded && (
+              <div className="ml-3 mt-1 space-y-1 border-l border-stone-200 pl-2">
+                {item.subItems.map((subItem) => {
+                  const isSubActive = subItem.isActive
+                    ? subItem.isActive(location.pathname)
+                    : location.pathname === subItem.href ||
+                      location.pathname.startsWith(`${subItem.href}/`);
                   return (
                     <Link
-                      key={item.name}
-                      to={item.href}
-                      onClick={() => setSidebarOpen(false)}
-                      className={cn(
-                        'group flex items-center px-2 py-2 text-base font-medium rounded-md',
-                        isActive
-                          ? 'bg-primary-100 text-primary-900'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      )}
+                      key={subItem.name}
+                      to={subItem.href}
+                      onClick={closeSidebar}
+                      className={navItemClass(isSubActive, size)}
                     >
-                      <item.icon className="mr-4 h-6 w-6" />
-                      {item.name}
+                      <subItem.icon className={cn('shrink-0', size === 'mobile' ? 'mr-3 h-5 w-5' : 'mr-3 h-4 w-4')} />
+                      {subItem.name}
                     </Link>
                   );
-                }
-              })}
-            </nav>
-          </div>
-          
-        </div>
-      </div>
-
-      {/* Desktop sidebar */}
-      <div className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64">
-          <div className="flex flex-col h-0 flex-1 border-r border-gray-200 bg-white">
-            <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-              <div className="flex items-center flex-shrink-0 px-4">
-                <Link to="/home" className="text-2xl font-bold text-primary-600 hover:text-primary-700 cursor-pointer">
-                  Plantin
-                </Link>
-              </div>
-              <nav className="mt-5 flex-1 px-2 bg-white space-y-1">
-                {allNavigation.map((item) => {
-                  if (hasSubItems(item)) {
-                    // Admin menu with subitems
-                    const isParentActive = location.pathname === item.href;
-                    const isAnyChildActive = item.subItems.some((subItem) =>
-                    subItem.isActive
-                      ? subItem.isActive(location.pathname)
-                      : location.pathname === subItem.href ||
-                        location.pathname.startsWith(`${subItem.href}/`)
-                  );
-                    const isExpanded = expandedAdminMenu;
-                    
-                    return (
-                      <div key={item.name}>
-                        <div
-                          className={cn(
-                            'group flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md',
-                            (isParentActive || isAnyChildActive)
-                              ? 'bg-primary-100 text-primary-900'
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                          )}
-                        >
-                          <div
-                            onClick={() => navigate(item.href)}
-                            className="flex flex-1 items-center cursor-pointer min-w-0"
-                          >
-                            <item.icon className="mr-3 h-5 w-5 shrink-0" />
-                            {item.name}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={toggleAdminMenu}
-                            className="ml-2 p-1 rounded hover:bg-black/5 shrink-0"
-                            aria-label={isExpanded ? 'Contraer menú de admin' : 'Expandir menú de admin'}
-                          >
-                            {isExpanded ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                          </button>
-                        </div>
-                        {isExpanded && (
-                          <div className="ml-4 mt-1 space-y-1">
-                            {item.subItems.map((subItem) => {
-                              const isSubActive = subItem.isActive
-                              ? subItem.isActive(location.pathname)
-                              : location.pathname === subItem.href ||
-                                location.pathname.startsWith(`${subItem.href}/`);
-                              return (
-                                <Link
-                                  key={subItem.name}
-                                  to={subItem.href}
-                                  className={cn(
-                                    'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
-                                    isSubActive
-                                      ? 'bg-primary-100 text-primary-900'
-                                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                  )}
-                                >
-                                  <subItem.icon className="mr-3 h-4 w-4" />
-                                  {subItem.name}
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  } else {
-                    // Regular menu item
-                    const isActive = item.isActive
-                    ? item.isActive(location.pathname)
-                    : location.pathname === item.href;
-                    return (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        className={cn(
-                          'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
-                          isActive
-                            ? 'bg-primary-100 text-primary-900'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        )}
-                      >
-                        <item.icon className="mr-3 h-5 w-5" />
-                        {item.name}
-                      </Link>
-                    );
-                  }
                 })}
-              </nav>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      const isActive = isItemActive(item);
+      return (
+        <Link
+          key={item.name}
+          to={item.href}
+          onClick={closeSidebar}
+          className={navItemClass(isActive, size)}
+        >
+          <item.icon className={cn(size === 'mobile' ? 'mr-4 h-6 w-6' : 'mr-3 h-5 w-5')} />
+          {item.name}
+        </Link>
+      );
+    });
+
+  return (
+    <div className="h-full flex bg-stone-50">
+      <div
+        className={cn(
+          'fixed inset-0 z-40 md:hidden',
+          sidebarOpen ? 'flex' : 'pointer-events-none hidden'
+        )}
+      >
+        <div
+          className={cn(
+            'fixed inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity',
+            sidebarOpen ? 'opacity-100' : 'opacity-0'
+          )}
+          onClick={closeSidebar}
+        />
+
+        <div
+          className={cn(
+            'relative flex w-full max-w-xs flex-1 flex-col bg-white shadow-xl transition-transform',
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          )}
+        >
+          <div className="flex items-center justify-between px-4 pt-5 pb-3">
+            <BrandMark onClick={closeSidebar} />
+            <button
+              type="button"
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+              onClick={closeSidebar}
+              aria-label="Cerrar menú"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-6 pt-2">
+            {renderNav('mobile')}
+          </nav>
+        </div>
+      </div>
+
+      <div className="hidden md:flex md:flex-shrink-0">
+        <div className="flex w-64 flex-col">
+          <div className="flex h-0 flex-1 flex-col border-r border-stone-200/80 bg-white">
+            <div className="flex flex-1 flex-col overflow-y-auto pb-4 pt-5">
+              <div className="flex flex-shrink-0 items-center px-4">
+                <BrandMark />
+              </div>
+              <nav className="mt-6 flex-1 space-y-1 px-3">{renderNav('desktop')}</nav>
             </div>
-            
           </div>
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex flex-col w-0 flex-1 overflow-hidden">
-        {/* Top Header Bar */}
-        <div className="bg-white shadow-sm border-b border-gray-200">
-          <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            {!sidebarOpen && (
+      <div className="flex w-0 flex-1 flex-col overflow-hidden">
+        <header className="sticky top-0 z-20 border-b border-stone-200/80 bg-white/90 backdrop-blur-md">
+          <div className="flex h-14 items-center justify-between px-4 sm:h-16 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-2 min-w-0">
               <button
                 type="button"
-                className="md:hidden -ml-0.5 h-10 w-10 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-stone-500 hover:bg-stone-100 hover:text-stone-900 md:hidden"
                 onClick={() => setSidebarOpen(true)}
+                aria-label="Abrir menú"
               >
                 <Menu className="h-6 w-6" />
               </button>
-            )}
-            <div className="flex-1" /> {/* Spacer */}
-            <div className="flex items-center space-x-3">
+              <span className="truncate text-lg font-semibold tracking-tight text-stone-900 md:hidden">
+                Plantin
+              </span>
+            </div>
+            <div className="relative" ref={userMenuRef}>
               <button
-                onClick={() => navigate('/profile')}
-                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                title="Mi Perfil"
+                type="button"
+                onClick={() => setUserMenuOpen((open) => !open)}
+                className="flex max-w-[14rem] items-center gap-2 rounded-xl py-1 pl-2.5 pr-1.5 text-left transition-colors hover:bg-stone-100 sm:max-w-xs"
+                aria-expanded={userMenuOpen}
+                aria-haspopup="menu"
               >
+                <span className="min-w-0 truncate text-sm font-medium text-stone-800">
+                  {displayName}
+                </span>
                 <UserAvatar
                   pictureId={user?.picture_id}
                   username={user?.username || currentUser?.username || ''}
                   size="small"
                 />
+                <ChevronDown
+                  className={cn(
+                    'h-4 w-4 shrink-0 text-stone-400 transition-transform',
+                    userMenuOpen && 'rotate-180'
+                  )}
+                />
               </button>
-              <button
-                onClick={() => {
-                  logout();
-                  navigate('/login');
-                }}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
-                title="Cerrar Sesión"
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
+
+              {userMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-xl border border-stone-200/80 bg-white py-1 shadow-lg"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      navigate('/profile');
+                    }}
+                    className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
+                  >
+                    <User className="h-4 w-4 text-stone-400" />
+                    Mi perfil
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      logout();
+                      navigate('/login');
+                    }}
+                    className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
+                  >
+                    <LogOut className="h-4 w-4 text-stone-400" />
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-        
-        <main className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        </header>
+
+        <main className="relative z-0 flex-1 overflow-y-auto pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
+          <div className="py-5 sm:py-6">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
               {children}
             </div>
           </div>
         </main>
       </div>
+
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200/80 bg-white/95 backdrop-blur-md md:hidden"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="grid grid-cols-4">
+          {navigation.map((item) => {
+            const active = isItemActive(item);
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={cn(
+                  'flex min-h-[56px] flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium touch-manipulation',
+                  active ? 'text-primary-700' : 'text-stone-500'
+                )}
+              >
+                <item.icon className={cn('h-5 w-5', active && 'stroke-[2.25]')} />
+                <span className="truncate max-w-full">{item.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
-} 
+}

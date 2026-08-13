@@ -90,7 +90,7 @@ export default function ProductTypesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="card p-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
@@ -112,7 +112,7 @@ export default function ProductTypesPage() {
       </div>
 
       {/* Desktop Product Types Table - Hidden on mobile */}
-      <div className="hidden md:block bg-white shadow rounded-lg overflow-hidden">
+      <div className="hidden md:block card overflow-hidden">
         {loading ? (
           <div className="p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -279,12 +279,12 @@ export default function ProductTypesPage() {
       {/* Mobile Product Types Cards - Hidden on desktop */}
       <div className="md:hidden space-y-4">
         {loading ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+          <div className="card p-4 text-center text-gray-500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
             <p className="mt-2">Cargando tipos de producto...</p>
           </div>
         ) : productTypes.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center">
+          <div className="card p-4 text-center">
             <Tags className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Sin tipos de producto</h3>
             <p className="mt-1 text-sm text-gray-500">
@@ -295,7 +295,7 @@ export default function ProductTypesPage() {
           productTypes.map((productType) => (
             <div 
               key={productType.id} 
-              className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
+              className="card p-4 cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => openProductType(productType.id)}
             >
               <div className="flex-1">
@@ -330,7 +330,7 @@ export default function ProductTypesPage() {
 
         {/* Mobile Pagination */}
         {totalPages > 1 && (
-          <div className="bg-white rounded-lg shadow p-4">
+          <div className="card p-4">
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}

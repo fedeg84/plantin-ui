@@ -99,7 +99,7 @@ export default function ProductsPage() {
         onFiltersChange={setFilters}
       />
 
-      <div className="hidden md:block bg-white shadow rounded-lg">
+      <div className="hidden md:block card">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -255,12 +255,12 @@ export default function ProductsPage() {
 
       <div className="md:hidden space-y-4">
         {isLoading ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+          <div className="card p-4 text-center text-gray-500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
             <p className="mt-2">Cargando productos...</p>
           </div>
         ) : products?.items.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-4 text-center">
+          <div className="card p-4 text-center">
             <Package className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Sin productos</h3>
             <p className="mt-1 text-sm text-gray-500">
@@ -271,7 +271,7 @@ export default function ProductsPage() {
           products?.items.map((product) => (
             <div 
               key={product.id} 
-              className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition-shadow"
+              className="card p-4 cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => openProduct(product.id)}
             >
               <div className="flex-1">

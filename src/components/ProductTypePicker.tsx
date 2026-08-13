@@ -208,7 +208,7 @@ export default function ProductTypePicker({
   };
 
   return (
-    <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+    <div className="card p-4 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
         <h2 className="text-lg font-medium text-gray-900">{title}</h2>
         {showCreateButton && (

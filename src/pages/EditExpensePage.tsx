@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { expenseApi } from '../api/endpoints';
 import { Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '../hooks/useConfirm';
 import BackButton from '../components/BackButton';
 import MoneyInput from '../components/MoneyInput';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
@@ -29,6 +30,7 @@ export default function EditExpensePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const expenseId = parseInt(id!);
 
   const {
@@ -96,8 +98,13 @@ export default function EditExpensePage() {
     },
   });
 
-  const handleDelete = () => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este pago? Esta acción no se puede deshacer.')) {
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: 'Eliminar pago',
+      message: '¿Estás seguro de que quieres eliminar este pago? Esta acción no se puede deshacer.',
+      confirmLabel: 'Eliminar',
+    });
+    if (confirmed) {
       deleteMutation.mutate();
     }
   };
@@ -132,13 +139,13 @@ export default function EditExpensePage() {
         <div className="flex items-center space-x-4">
           <BackButton fallback="/admin/payments" className="min-h-0" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Editar Pago #{expense.id}</h1>
+            <h1 className="page-title">Editar Pago #{expense.id}</h1>
           </div>
         </div>
       </div>
 
       {/* Form */}
-      <div className="bg-white shadow rounded-lg">
+      <div className="card">
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           {/* Description */}
           <div>
@@ -236,6 +243,7 @@ export default function EditExpensePage() {
           </div>
         </form>
       </div>
+      {ConfirmDialog}
     </div>
   );
 }

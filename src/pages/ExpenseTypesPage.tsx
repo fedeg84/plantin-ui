@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { expenseTypeApi } from '../api/endpoints';
 import { Plus, Tag, X, ChevronRight, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '../hooks/useConfirm';
 import { FilterSortPanel } from '../components/FilterSortPanel';
 import type { ExpenseType } from '../types/api';
 import {
@@ -35,6 +36,7 @@ export default function ExpenseTypesPage() {
   const [filters, setFilters] = useState<Record<string, unknown>>({});
   const [expandedTypes, setExpandedTypes] = useState<Set<number>>(new Set());
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const createForm = useForm<CreateExpenseTypeForm>({
     resolver: zodResolver(createExpenseTypeSchema),
@@ -152,13 +154,15 @@ export default function ExpenseTypesPage() {
     updateMutation.mutate({ id: editingType.id, data });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!editingType) return;
-    if (
-      window.confirm(
-        '¿Estás seguro de que quieres eliminar este tipo de pago? Los subtipos quedarán como tipos raíz.'
-      )
-    ) {
+    const confirmed = await confirm({
+      title: 'Eliminar tipo de pago',
+      message:
+        '¿Estás seguro de que quieres eliminar este tipo de pago? Los subtipos quedarán como tipos raíz.',
+      confirmLabel: 'Eliminar',
+    });
+    if (confirmed) {
       deleteMutation.mutate(editingType.id);
     }
   };
@@ -395,7 +399,7 @@ export default function ExpenseTypesPage() {
         onFiltersChange={setFilters}
       />
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
+      <div className="card overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -415,6 +419,7 @@ export default function ExpenseTypesPage() {
           <div>{visibleHierarchy.map((type) => renderTypeItem(type))}</div>
         )}
       </div>
+      {ConfirmDialog}
     </div>
   );
 }

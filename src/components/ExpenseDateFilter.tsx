@@ -27,7 +27,7 @@ export default function ExpenseDateFilter({
   const rangeInvalid = selectRange && !isExpenseDateRangeValid(selectRange, dateFrom, dateTo);
 
   return (
-    <div className={cn('bg-white shadow rounded-lg p-4', className)}>
+    <div className={cn('card p-4', className)}>
       {!selectRange ? (
         <div className="w-full sm:max-w-xs">
           <label htmlFor="expense-month-single" className="block text-sm font-medium text-gray-700 mb-1">

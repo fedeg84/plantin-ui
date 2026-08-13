@@ -8,6 +8,7 @@ import {
   UpdateProductTypeRequest,
 } from '../types/api';
 import toast from 'react-hot-toast';
+import { useConfirm } from '../hooks/useConfirm';
 import BackButton from '../components/BackButton';
 import { goBack } from '../utils/navigation';
 
@@ -15,6 +16,7 @@ export default function ProductTypeFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { confirm, ConfirmDialog } = useConfirm();
   const isEditing = !!id;
   const fallback = '/products/types';
 
@@ -103,9 +105,13 @@ export default function ProductTypeFormPage() {
   };
 
   const handleDelete = async () => {
-    if (!id || !confirm('¿Estás seguro de que quieres eliminar este tipo de producto?')) {
-      return;
-    }
+    if (!id) return;
+    const confirmed = await confirm({
+      title: 'Eliminar tipo de producto',
+      message: '¿Estás seguro de que quieres eliminar este tipo de producto?',
+      confirmLabel: 'Eliminar',
+    });
+    if (!confirmed) return;
 
     try {
       await productTypesApi.delete(parseInt(id));
@@ -126,13 +132,13 @@ export default function ProductTypeFormPage() {
       <div className="flex items-center space-x-4">
         <BackButton fallback={fallback} />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="page-title">
             {isEditing ? 'Editar tipo de producto' : 'Nuevo tipo de producto'}
           </h1>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="card p-6 space-y-6">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -217,6 +223,7 @@ export default function ProductTypeFormPage() {
           </div>
         </div>
       </form>
+      {ConfirmDialog}
     </div>
   );
 }
